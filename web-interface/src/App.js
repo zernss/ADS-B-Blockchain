@@ -79,6 +79,7 @@ function App() {
   const [attackedFlights, setAttackedFlights] = useState(new Set());
   const [attackResults, setAttackResults] = useState([]);
   const [contract, setContract] = useState(null);
+  const [updateStatus, setUpdateStatus] = useState('');
 
   const initializeBlockchain = useCallback(async () => {
     try {
@@ -96,9 +97,11 @@ function App() {
       // Initialize FlightDataService with contract
       const service = new FlightDataService(newContract);
       setFlightService(service);
-      service.start();
       
       setLoading(false);
+      
+      // Start the service after initialization
+      await service.start();
     } catch (err) {
       console.error("Failed to initialize blockchain:", err);
       setError("Failed to connect to blockchain. Please make sure MetaMask is installed and connected.");
@@ -107,12 +110,29 @@ function App() {
   }, []);
 
   const updateFlights = useCallback(async () => {
-    if (!flightService) return;
+    if (!flightService) {
+      console.error('Flight service not initialized');
+      return;
+    }
+    
     try {
+      setUpdateStatus('Fetching flight data from OpenSky Network...');
+      console.log('Calling flightService.updateFlightData()...');
       const newFlights = await flightService.updateFlightData();
-      setFlights(newFlights);
+      console.log('Received flights from OpenSky:', newFlights);
+      
+      if (newFlights && Array.isArray(newFlights)) {
+        console.log('Setting flights state with:', newFlights.length, 'flights');
+        setFlights(newFlights);
+        setUpdateStatus(`Successfully fetched ${newFlights.length} flights from OpenSky Network`);
+        setTimeout(() => setUpdateStatus(''), 3000);
+      } else {
+        console.error('Invalid flight data received:', newFlights);
+        setUpdateStatus('No valid flight data received from OpenSky Network');
+      }
     } catch (err) {
       console.error("Failed to update flights:", err);
+      setUpdateStatus('Failed to fetch flight data from OpenSky Network');
     }
   }, [flightService]);
 
@@ -123,15 +143,7 @@ function App() {
         flightService.stop();
       }
     };
-  }, [initializeBlockchain, flightService]);
-
-  useEffect(() => {
-    if (!flightService) return;
-
-    updateFlights();
-    const interval = setInterval(updateFlights, 5000);
-    return () => clearInterval(interval);
-  }, [flightService, updateFlights]);
+  }, [initializeBlockchain]);
 
   const simulateAttack = async (attackType) => {
     if (!flightService || flights.length === 0) return;
@@ -190,9 +202,24 @@ function App() {
           <Grid item xs={12} md={8}>
             <Card>
               <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Flight Map
-                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="h6">Flight Map</Typography>
+                  <Button 
+                    variant="contained" 
+                    onClick={updateFlights}
+                    disabled={!flightService || updateStatus === 'Fetching flight data...'}
+                  >
+                    Refresh Flight Data
+                  </Button>
+                </Box>
+                {updateStatus && (
+                  <Alert 
+                    severity={updateStatus.includes('success') ? 'success' : updateStatus.includes('Failed') ? 'error' : 'info'}
+                    sx={{ mb: 2 }}
+                  >
+                    {updateStatus}
+                  </Alert>
+                )}
                 <Map 
                   flights={flights} 
                   attackedFlights={attackedFlights}

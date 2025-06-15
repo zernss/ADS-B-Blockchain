@@ -1,5 +1,5 @@
-import React from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import React, { useEffect, useRef } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { Typography, Box } from '@mui/material';
 import 'leaflet/dist/leaflet.css';
@@ -31,14 +31,31 @@ const attackedIcon = new L.Icon({
   shadowSize: [41, 41]
 });
 
+// MapInitializer component to handle map initialization
+function MapInitializer() {
+  const map = useMap();
+  useEffect(() => {
+    if (map) {
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 100);
+    }
+  }, [map]);
+  return null;
+}
+
 const Map = ({ flights, attackedFlights }) => {
+  const mapRef = useRef(null);
+
   return (
     <Box sx={{ height: '70vh', width: '100%', position: 'relative' }}>
       <MapContainer
         center={[51.505, -0.09]}
         zoom={5}
         style={{ height: '100%', width: '100%' }}
+        ref={mapRef}
       >
+        <MapInitializer />
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -50,18 +67,13 @@ const Map = ({ flights, attackedFlights }) => {
             icon={attackedFlights.has(flight.icao24) ? attackedIcon : normalIcon}
           >
             <Popup>
-              <Typography variant="subtitle2">Flight: {flight.callsign}</Typography>
-              <Typography variant="body2">ICAO24: {flight.icao24}</Typography>
-              <Typography variant="body2">
-                Altitude: {flight.altitude}m
-              </Typography>
-              <Typography 
-                variant="body2" 
-                color={attackedFlights.has(flight.icao24) ? "error" : "success"}
-                sx={{ fontWeight: 'bold' }}
-              >
-                Status: {attackedFlights.has(flight.icao24) ? "⚠️ Under Attack" : "✓ Secure"}
-              </Typography>
+              <div>
+                <strong>{flight.callsign}</strong><br/>
+                Altitude: {Math.round(flight.altitude)}m<br/>
+                Speed: {Math.round(flight.velocity || 0)} knots<br/>
+                Status: {attackedFlights.has(flight.icao24) ? 
+                  'Under Attack' : 'Normal'}
+              </div>
             </Popup>
           </Marker>
         ))}

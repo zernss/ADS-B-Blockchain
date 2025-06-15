@@ -1,4 +1,4 @@
-import { generateFlightData } from './FlightDataGenerator';
+import { fetchFlightData } from './OpenSkyService';
 
 class TraditionalSystem {
   constructor() {
@@ -86,30 +86,41 @@ class FlightDataService {
   constructor(contract = null) {
     this.traditionalSystem = new TraditionalSystem();
     this.blockchainSystem = new BlockchainSystem(contract);
-    this.updateInterval = 5000; // 5 seconds
-    this.numFlights = 20;
   }
 
   async start() {
-    this.updateFlightData();
-    this.intervalId = setInterval(() => this.updateFlightData(), this.updateInterval);
+    // Initial data fetch
+    await this.updateFlightData();
   }
 
   stop() {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-    }
+    // Nothing to stop since we removed automatic updates
   }
 
   async updateFlightData() {
-    const flights = generateFlightData(this.numFlights);
-    
-    for (const flight of flights) {
-      await this.traditionalSystem.addFlightData(flight);
-      await this.blockchainSystem.addFlightData(flight);
-    }
+    try {
+      // Force refresh to get new data from OpenSky Network
+      const flights = await fetchFlightData(true);
+      
+      if (!flights || !Array.isArray(flights)) {
+        console.error('Invalid flight data received');
+        return [];
+      }
 
-    return flights;
+      // Clear previous data
+      this.traditionalSystem = new TraditionalSystem();
+      
+      // Add new flight data to both systems
+      for (const flight of flights) {
+        await this.traditionalSystem.addFlightData(flight);
+        await this.blockchainSystem.addFlightData(flight);
+      }
+
+      return flights;
+    } catch (error) {
+      console.error('Error updating flight data:', error);
+      return [];
+    }
   }
 
   async simulateAttack(attackType, targetFlight) {
@@ -118,40 +129,43 @@ class FlightDataService {
 
     switch (attackType) {
       case 'replay':
-        // Replay attack: use old position data
+        // Replay attack: use old position data with gradual position shift
         attackedFlight.timestamp = new Date(attackedFlight.timestamp.getTime() - 3600000); // 1 hour old
+        attackedFlight.latitude += (Math.random() * 0.5 - 0.25); // Small random shift
+        attackedFlight.longitude += (Math.random() * 0.5 - 0.25);
         break;
       
       case 'spoofing':
-        // Spoofing attack: create fake flight data with significant position changes
-        attackedFlight.latitude += (Math.random() * 2 - 1) * 2; // More noticeable change
-        attackedFlight.longitude += (Math.random() * 2 - 1) * 2;
-        attackedFlight.altitude += Math.floor(Math.random() * 10000); // Bigger altitude changes
+        // Spoofing attack: create fake flight data with smooth position changes
+        const targetLat = attackedFlight.latitude + (Math.random() * 2 - 1) * 2;
+        const targetLon = attackedFlight.longitude + (Math.random() * 2 - 1) * 2;
+        const targetAlt = attackedFlight.altitude + Math.floor(Math.random() * 10000);
+        
+        attackedFlight.latitude = targetLat;
+        attackedFlight.longitude = targetLon;
+        attackedFlight.altitude = targetAlt;
         attackedFlight.velocity = (attackedFlight.velocity || 0) + Math.floor(Math.random() * 200);
         attackedFlight.isVerified = false;
         break;
-      
-      case 'tampering':
-        // Tampering attack: modify existing data significantly
-        attackedFlight.altitude += 10000; // 10km altitude change
-        attackedFlight.velocity = (attackedFlight.velocity || 0) + 100;
-        attackedFlight.isVerified = false;
-        break;
-      
+        
       default:
         throw new Error('Unknown attack type');
     }
 
-    // Add the attacked flight to traditional system only
+    // Add the attacked flight to both systems
     await this.traditionalSystem.addFlightData(attackedFlight);
+    await this.blockchainSystem.addFlightData(attackedFlight);
 
-    // Return both original and attacked data for detailed comparison
+    // Verify the flight data in both systems
+    const [traditionalVerified, blockchainVerified] = await Promise.all([
+      this.traditionalSystem.verifyFlightData(attackedFlight.icao24),
+      this.blockchainSystem.verifyFlightData(attackedFlight.icao24)
+    ]);
+
     return {
-      type: attackType,
-      original: originalFlight,
-      attacked: attackedFlight,
-      detectedByTraditional: false, // Traditional system can't detect attacks
-      detectedByBlockchain: true // Blockchain system will detect the mismatch
+      detectedByTraditional: !traditionalVerified,
+      detectedByBlockchain: !blockchainVerified,
+      attackedFlight
     };
   }
 
