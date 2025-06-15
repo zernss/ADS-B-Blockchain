@@ -1,0 +1,13 @@
+{
+  "name": "adsb-traditional-system",
+  "version": "1.0.0",
+  "description": "Traditional ADS-B data storage system for security comparison",
+  "main": "FlightDataStorage.js",
+  "scripts": {
+    "test": "mocha *.test.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "mocha": "^10.2.0"
+  }
+} 

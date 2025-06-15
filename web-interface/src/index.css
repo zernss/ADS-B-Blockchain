@@ -1,0 +1,30 @@
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.leaflet-control-container .leaflet-control {
+  z-index: 2;
+}
+
+.leaflet-popup-content-wrapper {
+  background: white;
+  border-radius: 4px;
+  padding: 8px;
+}
+
+.leaflet-popup-content {
+  margin: 8px 12px;
+  line-height: 1.4;
+}
+
+.leaflet-popup-tip {
+  background: white;
+}
+
+/* Ensure markers are above the map */
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+  z-index: 3;
+} 
