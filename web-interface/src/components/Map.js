@@ -44,8 +44,16 @@ function MapInitializer() {
   return null;
 }
 
-const Map = ({ flights, attackedFlights }) => {
+const Map = ({ flights = [], attackedFlights = new Set() }) => {
   const mapRef = useRef(null);
+
+  if (!Array.isArray(flights)) {
+    return (
+      <Box sx={{ height: '70vh', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Typography>No flight data available</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ height: '70vh', width: '100%', position: 'relative' }}>
