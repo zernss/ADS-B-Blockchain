@@ -1,8 +1,11 @@
 const { ethers } = require("hardhat");
+const fs = require('fs');
+const path = require('path');
+const configPath = path.join(__dirname, '../web-interface/src/config.json');
+const config = JSON.parse(fs.readFileSync(configPath));
+const contractAddress = config.contractAddress;
 
 async function main() {
-  const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-
   // Get the network information
   const provider = ethers.provider;
   const network = await provider.getNetwork();

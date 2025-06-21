@@ -1,5 +1,10 @@
 const { ethers } = require("hardhat");
 const axios = require("axios");
+const fs = require('fs');
+const path = require('path');
+const configPath = path.join(__dirname, '../web-interface/src/config.json');
+const config = JSON.parse(fs.readFileSync(configPath));
+const contractAddress = config.contractAddress;
 
 async function fetchOpenSkyData() {
   try {
@@ -33,7 +38,6 @@ async function main() {
     // Get the contract instance
     const [signer] = await ethers.getSigners();
     const provider = ethers.provider;
-    const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
     const AdsbData = await ethers.getContractFactory("AdsbData");
     const adsbData = AdsbData.attach(contractAddress).connect(signer);
 

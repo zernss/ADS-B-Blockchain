@@ -300,10 +300,10 @@ class FlightDataService {
       for (const flight of flights) {
         const traditionalResult = await this.traditionalSystem.addFlightData(flight);
         if (traditionalResult) traditionalSuccess++;
-        
-        const blockchainResult = await this.blockchainSystem.addFlightData(flight);
-        if (blockchainResult) blockchainSuccess++;
       }
+      // Only one MetaMask confirmation for all flights:
+      const blockchainResult = await this.blockchainSystem.addFlightDataBatch(flights);
+      if (blockchainResult) blockchainSuccess = flights.length;
 
       blockchainLogger.log('success', 'Flight data update completed', {
         totalFlights: flights.length,
