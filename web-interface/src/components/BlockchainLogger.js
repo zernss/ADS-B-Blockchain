@@ -79,16 +79,21 @@ const getLevelColor = (level) => {
   }
 };
 
-const BlockchainLoggerComponent = () => {
+const BlockchainLoggerComponent = ({ provider, isConnected: initialIsConnected }) => {
   const [logs, setLogs] = useState([]);
   const [networkInfo, setNetworkInfo] = useState({});
   const [logStats, setLogStats] = useState({});
   const [expandedLogs, setExpandedLogs] = useState(new Set());
   const [filterLevel, setFilterLevel] = useState('all');
   const [autoScroll, setAutoScroll] = useState(true);
-  const [isConnected, setIsConnected] = useState(false);
+  const [isConnected, setIsConnected] = useState(initialIsConnected);
 
   useEffect(() => {
+    if (provider) {
+      blockchainLogger.setProvider(provider);
+      setIsConnected(true);
+    }
+
     // Update logs when logger has new entries
     const handleLogUpdate = (logEntry) => {
       if (logEntry.type === 'clear') {
@@ -121,7 +126,7 @@ const BlockchainLoggerComponent = () => {
       blockchainLogger.removeListener(handleLogUpdate);
       clearInterval(networkInterval);
     };
-  }, []);
+  }, [provider]);
 
   // Auto-scroll to bottom when new logs arrive
   useEffect(() => {

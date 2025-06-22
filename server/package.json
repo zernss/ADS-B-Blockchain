@@ -1,0 +1,21 @@
+{
+  "name": "adsb-transaction-relay",
+  "version": "1.0.0",
+  "description": "Transaction relay server for ADS-B Blockchain system",
+  "main": "transaction-relay.js",
+  "scripts": {
+    "start": "node transaction-relay.js",
+    "dev": "nodemon transaction-relay.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "ethers": "^5.7.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  },
+  "keywords": ["blockchain", "adsb", "ethereum", "relay"],
+  "author": "",
+  "license": "ISC"
+} 

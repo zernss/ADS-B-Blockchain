@@ -10,7 +10,7 @@ import config from '../config.json';
 
 function BlockchainPage() {
   const [flights, setFlights] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [flightService, setFlightService] = useState(null);
   const [attackedFlights, setAttackedFlights] = useState(new Set());
@@ -18,8 +18,15 @@ function BlockchainPage() {
   const [contract, setContract] = useState(null);
   const [updateStatus, setUpdateStatus] = useState('');
   const [activeTab, setActiveTab] = useState(0);
+  const [isConnected, setIsConnected] = useState(false);
+
+  const handleConnectWallet = async () => {
+    await initializeBlockchain();
+  };
 
   const initializeBlockchain = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
       // Check if MetaMask is installed
       if (!window.ethereum) {
@@ -80,6 +87,7 @@ function BlockchainPage() {
       setContract(newContract);
       const service = new FlightDataService(newContract);
       setFlightService(service);
+      setIsConnected(true);
       setLoading(false);
       await service.start();
     } catch (err) {
@@ -106,11 +114,10 @@ function BlockchainPage() {
   }, [flightService]);
 
   useEffect(() => {
-    initializeBlockchain();
     return () => {
       if (flightService) flightService.stop();
     };
-  }, [initializeBlockchain]);
+  }, [flightService]);
 
   const simulateAttack = async (attackType) => {
     if (!flightService || flights.length === 0) return;
@@ -132,6 +139,34 @@ function BlockchainPage() {
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
   };
+
+  if (!isConnected) {
+    return (
+      <Box sx={{ p: 4, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+        <Card sx={{ maxWidth: 500, textAlign: 'center' }}>
+          <CardContent>
+            <Typography variant="h5" gutterBottom>Connect to the Blockchain</Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+              To view live flight data and interact with the ADS-B smart contract, please connect your MetaMask wallet.
+            </Typography>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={handleConnectWallet}
+              disabled={loading}
+            >
+              {loading ? <CircularProgress size={24} /> : 'Connect Wallet'}
+            </Button>
+            {error && (
+              <Alert severity="error" sx={{ mt: 3, textAlign: 'left' }}>
+                <strong>{error.message}</strong>
+              </Alert>
+            )}
+          </CardContent>
+        </Card>
+      </Box>
+    );
+  }
 
   const renderError = (error) => {
     if (!error) return null;
@@ -164,11 +199,11 @@ function BlockchainPage() {
             content: (
               <Box>
                 <Typography variant="body1" gutterBottom>
-                  Please connect your MetaMask wallet to continue using the application.
+                  The wallet connection was rejected. Please try again.
                 </Typography>
                 <Button 
                   variant="contained" 
-                  onClick={() => window.location.reload()}
+                  onClick={handleConnectWallet}
                   sx={{ mt: 2 }}
                 >
                   Retry Connection
@@ -194,7 +229,7 @@ function BlockchainPage() {
                 </Typography>
                 <Button 
                   variant="contained" 
-                  onClick={() => window.location.reload()}
+                  onClick={handleConnectWallet}
                   sx={{ mt: 2 }}
                 >
                   Retry After Network Switch
@@ -218,7 +253,7 @@ function BlockchainPage() {
                 </Typography>
                 <Button 
                   variant="contained" 
-                  onClick={() => window.location.reload()}
+                  onClick={handleConnectWallet}
                   sx={{ mt: 2 }}
                 >
                   Retry Connection
@@ -237,7 +272,7 @@ function BlockchainPage() {
                 </Typography>
                 <Button 
                   variant="contained" 
-                  onClick={() => window.location.reload()}
+                  onClick={handleConnectWallet}
                   sx={{ mt: 2 }}
                 >
                   Retry
@@ -272,67 +307,62 @@ function BlockchainPage() {
 
   return (
     <Box>
-      <Tabs value={activeTab} onChange={handleTabChange} sx={{ mb: 3 }}>
-        <Tab label="Flight Map" />
-        <Tab label="Blockchain Info" />
-        <Tab label="Network Logger" />
-      </Tabs>
-
-      {activeTab === 0 && (
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={4}>
-            <BlockchainInfo contract={contract} attackResults={attackResults} />
-          </Grid>
-          <Grid item xs={12} md={8}>
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <Paper>
+            <Tabs value={activeTab} onChange={handleTabChange} centered>
+              <Tab label="Flight Map" />
+              <Tab label="Blockchain Info" />
+              <Tab label="Network Logger" />
+            </Tabs>
+          </Paper>
+        </Grid>
+        
+        {activeTab === 0 && (
+          <Grid item xs={12}>
             <Card>
               <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography variant="h6">Flight Map (Blockchain Secured)</Typography>
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Button variant="contained" onClick={updateFlights} disabled={!flightService || updateStatus === 'Fetching flight data...'}>Refresh Flight Data</Button>
-                    <Button variant="outlined" onClick={async () => {
-                      if (!flightService) return;
-                      setUpdateStatus('Syncing from blockchain...');
-                      const blockchainFlights = await flightService.blockchainSystem.getAllFlights();
-                      setFlights(blockchainFlights);
-                      setUpdateStatus(`Loaded ${blockchainFlights.length} flights from blockchain`);
-                      setTimeout(() => setUpdateStatus(''), 3000);
-                    }}>Sync from Blockchain</Button>
+                  <Box>
+                    <Button variant="contained" onClick={updateFlights} sx={{ mr: 1 }}>Refresh Flight Data</Button>
+                    <Button variant="outlined">Sync from Blockchain</Button>
                   </Box>
                 </Box>
-                {updateStatus && (
-                  <Alert severity={updateStatus.includes('success') ? 'success' : updateStatus.includes('Failed') ? 'error' : 'info'} sx={{ mb: 2 }}>{updateStatus}</Alert>
-                )}
-                <Map flights={flights} attackedFlights={attackedFlights} />
               </CardContent>
+              <Map flights={flights} attackedFlights={attackedFlights} />
             </Card>
           </Grid>
-          <Grid item xs={12}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>Attack Simulation Controls</Typography>
-                <Box sx={{ display: 'flex', gap: 2 }}>
-                  <Button variant="contained" color="warning" onClick={() => simulateAttack('replay')}>Simulate Replay Attack</Button>
-                  <Button variant="contained" color="error" onClick={() => simulateAttack('spoofing')}>Simulate Spoofing Attack</Button>
-                  <Button variant="contained" color="secondary" onClick={() => simulateAttack('tampering')}>Simulate Tampering Attack</Button>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-      )}
+        )}
 
-      {activeTab === 1 && (
-        <Grid container spacing={3}>
+        {activeTab === 1 && (
           <Grid item xs={12}>
             <BlockchainInfo contract={contract} attackResults={attackResults} />
           </Grid>
-        </Grid>
-      )}
+        )}
+        
+        {activeTab === 2 && (
+          <Grid item xs={12}>
+            <BlockchainLoggerComponent 
+              provider={contract?.provider} 
+              isConnected={!!contract} 
+            />
+          </Grid>
+        )}
 
-      {activeTab === 2 && (
-        <BlockchainLoggerComponent />
-      )}
+        <Grid item xs={12}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>Attack Simulation Controls</Typography>
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <Button variant="contained" color="warning" onClick={() => simulateAttack('replay')}>Simulate Replay Attack</Button>
+                <Button variant="contained" color="error" onClick={() => simulateAttack('spoofing')}>Simulate Spoofing Attack</Button>
+                <Button variant="contained" color="secondary" onClick={() => simulateAttack('tampering')}>Simulate Tampering Attack</Button>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
     </Box>
   );
 }

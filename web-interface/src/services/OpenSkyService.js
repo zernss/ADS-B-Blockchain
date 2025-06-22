@@ -8,7 +8,7 @@ const OPENSKY_PASSWORD = process.env.REACT_APP_OPENSKY_PASSWORD;
 // Cache to store the last fetch time and data
 let lastFetchTime = 0;
 let cachedData = [];
-const CACHE_DURATION = 10000; // 10 seconds minimum between fetches
+const CACHE_DURATION = 60000; // 60 seconds minimum between fetches
 
 const processFlightData = (state) => {
   // OpenSky data format: [icao24, callsign, origin_country, time_position, last_contact, longitude, latitude, baro_altitude, on_ground, velocity, true_track, vertical_rate, sensors, geo_altitude, squawk, spi, position_source]

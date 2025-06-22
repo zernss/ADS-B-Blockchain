@@ -17,6 +17,13 @@ class BlockchainLogger {
     };
   }
 
+  setProvider(provider) {
+    if (this.provider === provider) return; // Avoid re-initialization
+    this.provider = provider;
+    this.log('info', 'Blockchain Logger provider has been set.');
+    this.startListening();
+  }
+
   // Initialize the logger with provider and contract
   initialize(provider, contract) {
     this.provider = provider;

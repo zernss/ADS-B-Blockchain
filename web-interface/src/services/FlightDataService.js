@@ -254,62 +254,50 @@ class BlockchainSystem {
 class FlightDataService {
   constructor(contract = null) {
     this.traditionalSystem = new TraditionalSystem();
-    this.blockchainSystem = new BlockchainSystem(contract);
-    
-    // Initialize blockchain logger if contract is available
-    if (contract) {
-      const provider = contract.provider;
-      blockchainLogger.initialize(provider, contract);
-    }
+    this.blockchainSystem = contract ? new BlockchainSystem(contract) : null;
+    this.isUpdating = false;
+
+    // Load initial data from OpenSky Network
+    this.updateInterval = null;
   }
 
   async start() {
-    blockchainLogger.log('info', 'Flight Data Service started');
-    // Initial data fetch
     await this.updateFlightData();
   }
 
   stop() {
-    blockchainLogger.log('info', 'Flight Data Service stopped');
-    blockchainLogger.stopListening();
+    if (this.updateInterval) {
+      clearInterval(this.updateInterval);
+      this.updateInterval = null;
+    }
   }
 
-  async updateFlightData() {
+  async updateFlightData(forceRefresh = false) {
+    if (this.isUpdating) {
+      blockchainLogger.log('info', 'Update already in progress, skipping...');
+      return [];
+    }
+    
+    this.isUpdating = true;
+    blockchainLogger.log('info', 'Updating flight data...');
+
     try {
-      blockchainLogger.log('info', 'Starting flight data update from OpenSky Network');
-      
-      // Force refresh to get new data from OpenSky Network
-      const flights = await fetchFlightData(true);
-      
-      if (!flights || !Array.isArray(flights)) {
-        blockchainLogger.log('error', 'Invalid flight data received from OpenSky Network');
+      const flights = await fetchFlightData(forceRefresh);
+
+      if (!flights || flights.length === 0) {
+        blockchainLogger.log('warning', 'No new flight data received from OpenSky');
         return [];
       }
-
-      blockchainLogger.log('info', 'Received flight data from OpenSky Network', {
-        count: flights.length
-      });
-
-      // Clear previous data
-      this.traditionalSystem = new TraditionalSystem();
       
-      // Add new flight data to both systems
-      let traditionalSuccess = 0;
-      let blockchainSuccess = 0;
-      
-      for (const flight of flights) {
-        const traditionalResult = await this.traditionalSystem.addFlightData(flight);
-        if (traditionalResult) traditionalSuccess++;
+      // Add data to both systems
+      if (this.blockchainSystem) {
+        await this.blockchainSystem.addFlightDataBatch(flights);
       }
-      // Only one MetaMask confirmation for all flights:
-      const blockchainResult = await this.blockchainSystem.addFlightDataBatch(flights);
-      if (blockchainResult) blockchainSuccess = flights.length;
-
-      blockchainLogger.log('success', 'Flight data update completed', {
-        totalFlights: flights.length,
-        traditionalSuccess,
-        blockchainSuccess
-      });
+      for (const flight of flights) {
+        await this.traditionalSystem.addFlightData(flight);
+      }
+      
+      blockchainLogger.log('success', `Successfully updated ${flights.length} flights`);
 
       return flights;
     } catch (error) {
@@ -317,6 +305,8 @@ class FlightDataService {
         error: error.message
       });
       return [];
+    } finally {
+      this.isUpdating = false;
     }
   }
 
