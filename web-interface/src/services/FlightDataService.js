@@ -249,6 +249,80 @@ class BlockchainSystem {
       return [];
     }
   }
+
+  async addFlightDataWithDetails(flight) {
+    if (!this.contract) {
+      blockchainLogger.log('error', 'Cannot add flight data: Contract not available');
+      return null;
+    }
+    try {
+      blockchainLogger.log('info', 'Adding flight data to blockchain', {
+        icao24: flight.icao24,
+        callsign: flight.callsign,
+        latitude: flight.latitude,
+        longitude: flight.longitude,
+        altitude: flight.altitude
+      });
+      const tx = await this.contract.updateFlight(
+        flight.icao24,
+        flight.callsign || '',
+        Math.floor(flight.latitude * 1e6),
+        Math.floor(flight.longitude * 1e6),
+        Math.floor(flight.altitude),
+        flight.onGround || false,
+        flight.isSpoofed || false
+      );
+      blockchainLogger.log('transaction', 'Flight data transaction submitted', {
+        transactionHash: tx.hash,
+        icao24: flight.icao24
+      });
+      const receipt = await tx.wait();
+      blockchainLogger.log('success', 'Flight data added to blockchain successfully', {
+        transactionHash: tx.hash,
+        blockNumber: receipt.blockNumber,
+        gasUsed: receipt.gasUsed.toString(),
+        icao24: flight.icao24
+      });
+      // Parse event logs
+      const eventLogs = [];
+      if (receipt && receipt.logs && receipt.logs.length > 0) {
+        for (const log of receipt.logs) {
+          try {
+            const parsed = this.contract.interface.parseLog(log);
+            eventLogs.push({
+              name: parsed.name,
+              values: parsed.args
+            });
+          } catch (e) {
+            // Not a contract event we care about
+          }
+        }
+      }
+      return {
+        transactionHash: tx.hash,
+        blockNumber: receipt.blockNumber,
+        eventLogs
+      };
+    } catch (error) {
+      blockchainLogger.log('error', 'Failed to add flight data to blockchain', {
+        icao24: flight.icao24,
+        error: error.message
+      });
+      error.eventLogs = [];
+      if (error.receipt && error.receipt.logs && error.receipt.logs.length > 0) {
+        for (const log of error.receipt.logs) {
+          try {
+            const parsed = this.contract.interface.parseLog(log);
+            error.eventLogs.push({
+              name: parsed.name,
+              values: parsed.args
+            });
+          } catch (e) {}
+        }
+      }
+      throw error;
+    }
+  }
 }
 
 class FlightDataService {
@@ -311,85 +385,70 @@ class FlightDataService {
   }
 
   async simulateAttack(attackType, targetFlight) {
-    blockchainLogger.log('warning', `Simulating ${attackType} attack`, {
-      targetFlight: targetFlight.callsign,
-      icao24: targetFlight.icao24
-    });
+    if (this.blockchainSystem) {
+      let attackedFlight = null; // Ensure attackedFlight is always defined
+      try {
+        // Create the attacked flight with more severe modifications
+        attackedFlight = { ...targetFlight };
+        
+        switch (attackType) {
+          case 'replay':
+            // Make timestamp 1 hour old (should trigger replay detection)
+            attackedFlight.timestamp = new Date(targetFlight.timestamp.getTime() - 3600000);
+            attackedFlight.latitude += (Math.random() * 0.5 - 0.25);
+            attackedFlight.longitude += (Math.random() * 0.5 - 0.25);
+            break;
+          
+          case 'spoofing':
+            // Make position changes much larger to trigger spoofing detection
+            // Add ±5 degrees (roughly 500+ km) which should trigger the 500km detection
+            attackedFlight.latitude += (Math.random() * 10 - 5);
+            attackedFlight.longitude += (Math.random() * 10 - 5);
+            attackedFlight.altitude += Math.floor(Math.random() * 10000);
+            attackedFlight.isSpoofed = true;
+            break;
+            
+          case 'tampering':
+            // Make altitude changes much larger to trigger tampering detection
+            // Add ±15km altitude change which should trigger the 10km detection
+            attackedFlight.altitude += Math.floor(Math.random() * 30000) - 15000;
+            attackedFlight.velocity = (attackedFlight.velocity || 0) + Math.floor(Math.random() * 200);
+            break;
+            
+          default:
+            throw new Error('Unknown attack type');
+        }
 
-    const attackedFlight = { ...targetFlight };
-    const originalFlight = { ...targetFlight };
-
-    switch (attackType) {
-      case 'replay':
-        // Replay attack: use old position data with gradual position shift
-        attackedFlight.timestamp = new Date(attackedFlight.timestamp.getTime() - 3600000); // 1 hour old
-        attackedFlight.latitude += (Math.random() * 0.5 - 0.25); // Small random shift
-        attackedFlight.longitude += (Math.random() * 0.5 - 0.25);
-        blockchainLogger.log('info', 'Replay attack: Modified timestamp and position', {
-          originalTimestamp: originalFlight.timestamp,
-          attackedTimestamp: attackedFlight.timestamp,
-          positionShift: {
-            lat: attackedFlight.latitude - originalFlight.latitude,
-            lon: attackedFlight.longitude - originalFlight.longitude
-          }
-        });
-        break;
-      
-      case 'spoofing':
-        // Spoofing attack: create fake flight data with smooth position changes
-        const targetLat = attackedFlight.latitude + (Math.random() * 2 - 1) * 2;
-        const targetLon = attackedFlight.longitude + (Math.random() * 2 - 1) * 2;
-        const targetAlt = attackedFlight.altitude + Math.floor(Math.random() * 10000);
-        
-        attackedFlight.latitude = targetLat;
-        attackedFlight.longitude = targetLon;
-        attackedFlight.altitude = targetAlt;
-        attackedFlight.velocity = (attackedFlight.velocity || 0) + Math.floor(Math.random() * 200);
-        attackedFlight.isVerified = false;
-        attackedFlight.isSpoofed = true;
-        
-        blockchainLogger.log('info', 'Spoofing attack: Created fake flight data', {
-          originalPosition: {
-            lat: originalFlight.latitude,
-            lon: originalFlight.longitude,
-            alt: originalFlight.altitude
-          },
-          spoofedPosition: {
-            lat: attackedFlight.latitude,
-            lon: attackedFlight.longitude,
-            alt: attackedFlight.altitude
-          }
-        });
-        break;
-        
-      default:
-        throw new Error('Unknown attack type');
+        // Actually try to submit the malicious data to blockchain
+        const txResult = await this.blockchainSystem.addFlightDataWithDetails(attackedFlight);
+        blockchainLogger.log('success', 'Attack simulation: Data accepted by blockchain', { attackType, targetFlight });
+        return {
+          attackType,
+          targetFlight,
+          attackedFlight,
+          transactionHash: txResult?.transactionHash,
+          blockNumber: txResult?.blockNumber,
+          detectedByBlockchain: false,
+          message: 'Attack Succeeded: The malicious data was accepted by the blockchain.',
+          eventLogs: txResult?.eventLogs || []
+        };
+      } catch (error) {
+        blockchainLogger.log('error', 'Attack Prevented by Blockchain', { attackType, targetFlight, reason: error.message });
+        return {
+          attackType,
+          targetFlight,
+          attackedFlight,
+          detectedByBlockchain: true,
+          reason: error.message,
+          message: 'Attack Prevented: The smart contract rejected the malicious transaction.',
+          eventLogs: error.eventLogs || []
+        };
+      }
+    } else {
+      // Traditional system: always accept
+      blockchainLogger.log('success', 'Attack Succeeded (Traditional System)', { attackType, targetFlight });
+      return { detectedByTraditional: false };
     }
-
-    // Add the attacked flight to both systems
-    await this.traditionalSystem.addFlightData(attackedFlight);
-    await this.blockchainSystem.addFlightData(attackedFlight);
-
-    // Verify the flight data in both systems
-    const [traditionalVerified, blockchainVerified] = await Promise.all([
-      this.traditionalSystem.verifyFlightData(attackedFlight.icao24),
-      this.blockchainSystem.verifyFlightData(attackedFlight.icao24)
-    ]);
-
-    const result = {
-      detectedByTraditional: !traditionalVerified,
-      detectedByBlockchain: !blockchainVerified,
-      attackedFlight
-    };
-
-    blockchainLogger.log('info', 'Attack simulation completed', {
-      attackType,
-      targetFlight: targetFlight.callsign,
-      traditionalDetected: result.detectedByTraditional,
-      blockchainDetected: result.detectedByBlockchain
-    });
-
-    return result;
   }
 
   getTraditionalSystem() {

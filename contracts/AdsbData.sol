@@ -34,6 +34,11 @@ contract AdsbData {
         uint256 timestamp
     );
 
+    event FlightRejected(
+        string icao24,
+        string reason
+    );
+
     constructor() {
         // Initialize any other necessary variables
     }
@@ -52,6 +57,37 @@ contract AdsbData {
         require(_longitude >= -180000000 && _longitude <= 180000000, "Invalid longitude");
 
         uint256 currentTime = block.timestamp;
+        Flight storage prev = latestFlights[_icao24];
+        if (bytes(prev.icao24).length > 0) {
+            // 1. Replay attack prevention
+            if (currentTime <= prev.timestamp) {
+                emit FlightRejected(_icao24, "Replay attack: timestamp not newer");
+                revert("Replay attack: timestamp not newer");
+            }
+            // 2. Spoofing/tampering prevention
+            // Calculate distance (Haversine formula approximation, in meters)
+            int256 dLat = _latitude - prev.latitude;
+            int256 dLon = _longitude - prev.longitude;
+            // Convert to degrees
+            int256 dLatDeg = dLat / 1000000;
+            int256 dLonDeg = dLon / 1000000;
+            // Approximate: 1 deg latitude ~ 111km, 1 deg longitude ~ 85km at mid-latitude
+            int256 distMeters = abs(dLatDeg) * 111000 + abs(dLonDeg) * 85000;
+            uint256 dt = currentTime - prev.timestamp;
+            if (dt > 0) {
+                // If >500km in 1 min, reject
+                if (distMeters > 500000 && dt < 60) {
+                    emit FlightRejected(_icao24, "Spoofing: impossible position jump");
+                    revert("Spoofing: impossible position jump");
+                }
+                // If >10,000m altitude change in 1 min, reject
+                int256 dAlt = _altitude - prev.altitude;
+                if (abs(dAlt) > 1000000 && dt < 60) {
+                    emit FlightRejected(_icao24, "Tampering: impossible altitude jump");
+                    revert("Tampering: impossible altitude jump");
+                }
+            }
+        }
 
         // Store the flight data
         latestFlights[_icao24] = Flight({
@@ -108,6 +144,31 @@ contract AdsbData {
             require(bytes(_icao24s[i]).length > 0, "ICAO24 is required");
             require(_latitudes[i] >= -90000000 && _latitudes[i] <= 90000000, "Invalid latitude");
             require(_longitudes[i] >= -180000000 && _longitudes[i] <= 180000000, "Invalid longitude");
+
+            Flight storage prev = latestFlights[_icao24s[i]];
+            if (bytes(prev.icao24).length > 0) {
+                if (currentTime <= prev.timestamp) {
+                    emit FlightRejected(_icao24s[i], "Replay attack: timestamp not newer");
+                    revert("Replay attack: timestamp not newer");
+                }
+                int256 dLat = _latitudes[i] - prev.latitude;
+                int256 dLon = _longitudes[i] - prev.longitude;
+                int256 dLatDeg = dLat / 1000000;
+                int256 dLonDeg = dLon / 1000000;
+                int256 distMeters = abs(dLatDeg) * 111000 + abs(dLonDeg) * 85000;
+                uint256 dt = currentTime - prev.timestamp;
+                if (dt > 0) {
+                    if (distMeters > 500000 && dt < 60) {
+                        emit FlightRejected(_icao24s[i], "Spoofing: impossible position jump");
+                        revert("Spoofing: impossible position jump");
+                    }
+                    int256 dAlt = _altitudes[i] - prev.altitude;
+                    if (abs(dAlt) > 1000000 && dt < 60) {
+                        emit FlightRejected(_icao24s[i], "Tampering: impossible altitude jump");
+                        revert("Tampering: impossible altitude jump");
+                    }
+                }
+            }
 
             // Add to active flights if not already present
             if (!isActive[_icao24s[i]]) {
@@ -196,5 +257,9 @@ contract AdsbData {
         }
 
         return (icao24s, callsigns, latitudes, longitudes, altitudes, onGrounds, timestamps, isSpoofedFlags);
+    }
+
+    function abs(int256 x) private pure returns (int256) {
+        return x >= 0 ? x : -x;
     }
 }

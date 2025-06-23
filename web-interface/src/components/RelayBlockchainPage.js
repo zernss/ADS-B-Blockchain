@@ -104,7 +104,11 @@ function RelayBlockchainPage() {
         timestamp: new Date(),
         type: attackType,
         targetFlight: targetFlight.callsign,
-        detectedByBlockchain: result.detectedByBlockchain
+        detectedByBlockchain: result.detectedByBlockchain,
+        reason: result.reason,
+        transactionHash: result.transactionHash,
+        attackedFlight: result.attackedFlight,
+        eventLogs: result.eventLogs
       }, ...prev].slice(0, 10));
     } catch (err) {
       setError({
@@ -294,6 +298,75 @@ function RelayBlockchainPage() {
                   <Button variant="contained" color="warning" onClick={() => simulateAttack('replay')}>Simulate Replay Attack</Button>
                   <Button variant="contained" color="error" onClick={() => simulateAttack('spoofing')}>Simulate Spoofing Attack</Button>
                   <Button variant="contained" color="secondary" onClick={() => simulateAttack('tampering')}>Simulate Tampering Attack</Button>
+                </Box>
+                {/* Attack Results Table */}
+                <Box sx={{ mt: 3 }}>
+                  <Typography variant="subtitle1">Attack Results (Relay Blockchain System):</Typography>
+                  {attackResults.length === 0 && (
+                    <Typography variant="body2" color="text.secondary">No attacks simulated yet</Typography>
+                  )}
+                  {attackResults.map((result, idx) => (
+                    <Card key={idx} sx={{ my: 2, p: 2, background: result.detectedByBlockchain ? '#ffeaea' : '#eaffea' }}>
+                      <Typography variant="subtitle2" color={result.detectedByBlockchain ? 'error' : 'success.main'}>
+                        {result.timestamp.toLocaleTimeString()} - {result.type} attack on {result.targetFlight}
+                      </Typography>
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        {result.detectedByBlockchain ? `Attack Prevented by Blockchain: ${result.reason}` : 'Attack Succeeded: Data accepted by blockchain.'}
+                      </Typography>
+                      {result.transactionHash && (
+                        <Typography variant="body2">
+                          Transaction Hash: <a href={`https://sepolia.etherscan.io/tx/${result.transactionHash}`} target="_blank" rel="noopener noreferrer">{result.transactionHash}</a>
+                        </Typography>
+                      )}
+                      {/* Show before/after data if available */}
+                      {result.targetFlight && result.attackedFlight && (
+                        <Box sx={{ mt: 1, mb: 1 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>Submitted Data:</Typography>
+                          <Box sx={{ display: 'flex', gap: 4 }}>
+                            <Box>
+                              <Typography variant="caption">Original</Typography>
+                              <pre style={{ fontSize: 12 }}>{JSON.stringify(result.targetFlight, null, 2)}</pre>
+                            </Box>
+                            <Box>
+                              <Typography variant="caption">Attacked</Typography>
+                              <pre style={{ fontSize: 12 }}>{JSON.stringify(result.attackedFlight, null, 2)}</pre>
+                            </Box>
+                          </Box>
+                        </Box>
+                      )}
+                      {/* Show event logs if present */}
+                      {result.eventLogs && result.eventLogs.length > 0 && (
+                        <Box sx={{ mt: 1 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>Event Logs:</Typography>
+                          {result.eventLogs.map((ev, i) => (
+                            <Box key={i} sx={{ ml: 2 }}>
+                              <Typography variant="caption">{ev.name}</Typography>
+                              <pre style={{ fontSize: 12 }}>{JSON.stringify(ev.values, null, 2)}</pre>
+                            </Box>
+                          ))}
+                        </Box>
+                      )}
+                      {/* Side-by-side comparison table */}
+                      <Box sx={{ mt: 2 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>System Comparison:</Typography>
+                        <Box sx={{ display: 'flex', gap: 4, mt: 1 }}>
+                          <Box sx={{ flex: 1, border: '1px solid #ccc', borderRadius: 1, p: 1 }}>
+                            <Typography variant="subtitle2" color="secondary">Traditional System</Typography>
+                            <Typography variant="body2" color="success.main">Attack Succeeded: Data accepted by traditional system.</Typography>
+                          </Box>
+                          <Box sx={{ flex: 1, border: '1px solid #ccc', borderRadius: 1, p: 1 }}>
+                            <Typography variant="subtitle2" color="primary">Blockchain System</Typography>
+                            <Typography variant="body2" color={result.detectedByBlockchain ? 'error' : 'success.main'}>
+                              {result.detectedByBlockchain ? `Attack Prevented: ${result.reason}` : 'Attack Succeeded: Data accepted by blockchain.'}
+                            </Typography>
+                            {result.transactionHash && (
+                              <Typography variant="caption">TX: <a href={`https://sepolia.etherscan.io/tx/${result.transactionHash}`} target="_blank" rel="noopener noreferrer">{result.transactionHash}</a></Typography>
+                            )}
+                          </Box>
+                        </Box>
+                      </Box>
+                    </Card>
+                  ))}
                 </Box>
               </CardContent>
             </Card>

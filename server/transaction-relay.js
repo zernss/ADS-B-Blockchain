@@ -239,20 +239,25 @@ app.post('/simulate-attack', async (req, res) => {
     
     switch (attackType) {
       case 'replay':
+        // Make timestamp 1 hour old (should trigger replay detection)
         attackedFlight.timestamp = new Date(new Date(attackedFlight.timestamp).getTime() - 3600000);
         attackedFlight.latitude += (Math.random() * 0.5 - 0.25);
         attackedFlight.longitude += (Math.random() * 0.5 - 0.25);
         break;
       
       case 'spoofing':
-        attackedFlight.latitude += (Math.random() * 2 - 1) * 2;
-        attackedFlight.longitude += (Math.random() * 2 - 1) * 2;
+        // Make position changes much larger to trigger spoofing detection
+        // Add ±5 degrees (roughly 500+ km) which should trigger the 500km detection
+        attackedFlight.latitude += (Math.random() * 10 - 5);
+        attackedFlight.longitude += (Math.random() * 10 - 5);
         attackedFlight.altitude += Math.floor(Math.random() * 10000);
         attackedFlight.isSpoofed = true;
         break;
         
       case 'tampering':
-        attackedFlight.altitude += Math.floor(Math.random() * 5000) - 2500;
+        // Make altitude changes much larger to trigger tampering detection
+        // Add ±15km altitude change which should trigger the 10km detection
+        attackedFlight.altitude += Math.floor(Math.random() * 30000) - 15000;
         attackedFlight.velocity = (attackedFlight.velocity || 0) + Math.floor(Math.random() * 200);
         break;
         
@@ -260,35 +265,85 @@ app.post('/simulate-attack', async (req, res) => {
         return res.status(400).json({ success: false, error: 'Unknown attack type' });
     }
     
-    // Add the attacked flight to blockchain
-    const tx = await contract.updateFlight(
-      attackedFlight.icao24,
-      attackedFlight.callsign || '',
-      Math.floor(attackedFlight.latitude * 1e6),
-      Math.floor(attackedFlight.longitude * 1e6),
-      Math.floor(attackedFlight.altitude),
-      attackedFlight.onGround || false,
-      attackedFlight.isSpoofed || false
-    );
-    
-    const receipt = await tx.wait();
-    
-    console.log(`✅ Attack simulation completed!`);
-    console.log(`   Transaction: ${tx.hash}`);
-    console.log(`   Attack type: ${attackType}`);
-    
-    res.json({
-      success: true,
-      transactionHash: tx.hash,
-      blockNumber: receipt.blockNumber,
-      attackType,
-      targetFlight: targetFlight.callsign,
-      attackedFlight,
-      detectedByBlockchain: false // For comparison purposes
-    });
+    try {
+      // Add the attacked flight to blockchain
+      const nonce = await provider.getTransactionCount(wallet.address, 'latest');
+      const tx = await contract.updateFlight(
+        attackedFlight.icao24,
+        attackedFlight.callsign || '',
+        Math.floor(attackedFlight.latitude * 1e6),
+        Math.floor(attackedFlight.longitude * 1e6),
+        Math.floor(attackedFlight.altitude),
+        attackedFlight.onGround || false,
+        attackedFlight.isSpoofed || false,
+        { nonce }
+      );
+      
+      const receipt = await tx.wait();
+      
+      // Parse event logs (FlightUpdated, etc.)
+      const eventLogs = [];
+      if (receipt && receipt.logs && receipt.logs.length > 0) {
+        for (const log of receipt.logs) {
+          try {
+            const parsed = contract.interface.parseLog(log);
+            eventLogs.push({
+              name: parsed.name,
+              values: parsed.args
+            });
+          } catch (e) {
+            // Not a contract event we care about
+          }
+        }
+      }
+
+      console.log(`✅ Attack Succeeded (Data Accepted by Blockchain)!`);
+      console.log(`   Transaction: ${tx.hash}`);
+      console.log(`   Attack type: ${attackType}`);
+
+      res.json({
+        success: true,
+        attackType,
+        targetFlight,
+        attackedFlight,
+        transactionHash: tx.hash,
+        blockNumber: receipt.blockNumber,
+        detectedByBlockchain: false,
+        message: "Attack Succeeded: The malicious data was accepted by the blockchain.",
+        eventLogs
+      });
+
+    } catch (error) {
+      // Try to parse event logs from the error receipt if available
+      let eventLogs = [];
+      if (error.receipt && error.receipt.logs && error.receipt.logs.length > 0) {
+        for (const log of error.receipt.logs) {
+          try {
+            const parsed = contract.interface.parseLog(log);
+            eventLogs.push({
+              name: parsed.name,
+              values: parsed.args
+            });
+          } catch (e) {
+            // Not a contract event we care about
+          }
+        }
+      }
+      console.error(`❌ Attack Prevented by Blockchain: ${error.reason || error.message}`);
+      res.json({
+        success: true, // The API call itself was successful
+        attackType,
+        targetFlight,
+        attackedFlight,
+        detectedByBlockchain: true,
+        reason: error.reason || "Transaction reverted by smart contract.",
+        message: "Attack Prevented: The smart contract rejected the malicious transaction.",
+        eventLogs
+      });
+    }
     
   } catch (error) {
-    console.error('Error simulating attack:', error);
+    console.error('Error in /simulate-attack endpoint:', error);
     res.status(500).json({ 
       success: false,
       error: error.message 

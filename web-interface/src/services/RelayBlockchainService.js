@@ -211,54 +211,44 @@ class RelayBlockchainSystem {
   }
 
   async simulateAttack(attackType, targetFlight) {
-    if (!this.isConnected) {
-      blockchainLogger.log('error', 'Cannot simulate attack: Relay server not connected');
-      return { detectedByBlockchain: false };
-    }
-    
     try {
-      blockchainLogger.log('warning', `Simulating ${attackType} attack via relay server`, {
-        targetFlight: targetFlight.callsign,
-        icao24: targetFlight.icao24
-      });
-
       const response = await fetch(`${this.relayUrl}/simulate-attack`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ attackType, targetFlight })
+        body: JSON.stringify({ attackType, targetFlight }),
       });
 
-      const result = await response.json();
-      
-      if (result.success) {
-        blockchainLogger.log('success', 'Attack simulation completed via relay server', {
-          attackType,
-          targetFlight: targetFlight.callsign,
-          transactionHash: result.transactionHash
-        });
-        
-        return {
-          detectedByBlockchain: result.detectedByBlockchain,
-          attackedFlight: result.attackedFlight,
-          transactionHash: result.transactionHash
-        };
-      } else {
-        blockchainLogger.log('error', 'Attack simulation failed via relay server', {
-          attackType,
-          targetFlight: targetFlight.callsign,
-          error: result.error
-        });
-        return { detectedByBlockchain: false };
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Network response was not ok');
       }
+      
+      const result = await response.json();
+
+      if (result.detectedByBlockchain) {
+        console.log(`✅ Attack Prevented by Relay/Blockchain: ${result.reason}`);
+        blockchainLogger.log('error', `Attack Prevented: ${attackType}`, { 
+          reason: result.reason,
+          flight: result.targetFlight?.callsign,
+          eventLogs: result.eventLogs
+        });
+      } else {
+        console.log(`ATTACK SUCCEEDED on Relay system. Hash: ${result.transactionHash}`);
+        blockchainLogger.log('success', `Attack Succeeded: ${attackType}`, {
+          transaction: result.transactionHash,
+          flight: result.targetFlight?.callsign,
+          eventLogs: result.eventLogs
+        });
+      }
+      
+      return result;
+
     } catch (error) {
-      blockchainLogger.log('error', 'Relay server attack simulation failed', {
-        attackType,
-        targetFlight: targetFlight.callsign,
-        error: error.message
-      });
-      return { detectedByBlockchain: false };
+      console.error('Error simulating attack via relay:', error);
+      blockchainLogger.log('error', 'Failed to simulate attack', { error: error.message });
+      throw error;
     }
   }
 }

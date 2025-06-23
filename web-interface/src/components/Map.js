@@ -12,22 +12,23 @@ L.Icon.Default.mergeOptions({
   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
 
-// Custom icons for normal and attacked flights
-const normalIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+// Custom icon for default state
+const defaultIcon = new L.Icon({
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
   shadowSize: [41, 41]
 });
 
+// Custom icon for attacked state
 const attackedIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
   shadowSize: [41, 41]
 });
 
@@ -44,10 +45,10 @@ function MapInitializer() {
   return null;
 }
 
-const Map = ({ flights = [], attackedFlights = new Set() }) => {
+const Map = ({ flights, onFlightSelect }) => {
   const mapRef = useRef(null);
 
-  if (!Array.isArray(flights)) {
+  if (!flights || flights.length === 0) {
     return (
       <Box sx={{ height: '70vh', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Typography>No flight data available</Typography>
@@ -55,10 +56,12 @@ const Map = ({ flights = [], attackedFlights = new Set() }) => {
     );
   }
 
+  const center = [51.505, -0.09]; // Default center
+
   return (
     <Box sx={{ height: '70vh', width: '100%', position: 'relative' }}>
       <MapContainer
-        center={[51.505, -0.09]}
+        center={center}
         zoom={5}
         style={{ height: '100%', width: '100%' }}
         ref={mapRef}
@@ -72,16 +75,26 @@ const Map = ({ flights = [], attackedFlights = new Set() }) => {
           <Marker
             key={flight.icao24}
             position={[flight.latitude, flight.longitude]}
-            icon={attackedFlights.has(flight.icao24) ? attackedIcon : normalIcon}
+            icon={flight.isUnderAttack ? attackedIcon : defaultIcon}
+            eventHandlers={{
+              click: () => onFlightSelect(flight),
+            }}
           >
             <Popup>
-              <div>
-                <strong>{flight.callsign}</strong><br/>
-                Altitude: {Math.round(flight.altitude)}m<br/>
-                Speed: {Math.round(flight.velocity || 0)} knots<br/>
-                Status: {attackedFlights.has(flight.icao24) ? 
-                  'Under Attack' : 'Normal'}
-              </div>
+              <Box>
+                <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
+                  {flight.callsign || flight.icao24}
+                </Typography>
+                <Typography variant="body1">
+                  Altitude: {Math.round(flight.altitude)}m
+                </Typography>
+                <Typography variant="body1">
+                  Speed: {Math.round(flight.velocity * 3.6)} km/h
+                </Typography>
+                <Typography variant="body1">
+                  Status: {flight.isUnderAttack ? 'Under Attack' : 'Normal'}
+                </Typography>
+              </Box>
             </Popup>
           </Marker>
         ))}
