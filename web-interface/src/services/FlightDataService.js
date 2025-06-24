@@ -385,69 +385,77 @@ class FlightDataService {
   }
 
   async simulateAttack(attackType, targetFlight) {
-    if (this.blockchainSystem) {
-      let attackedFlight = null; // Ensure attackedFlight is always defined
-      try {
-        // Create the attacked flight with more severe modifications
-        attackedFlight = { ...targetFlight };
-        
-        switch (attackType) {
-          case 'replay':
-            // Make timestamp 1 hour old (should trigger replay detection)
-            attackedFlight.timestamp = new Date(targetFlight.timestamp.getTime() - 3600000);
-            attackedFlight.latitude += (Math.random() * 0.5 - 0.25);
-            attackedFlight.longitude += (Math.random() * 0.5 - 0.25);
-            break;
-          
-          case 'spoofing':
-            // Make position changes much larger to trigger spoofing detection
-            // Add ±5 degrees (roughly 500+ km) which should trigger the 500km detection
-            attackedFlight.latitude += (Math.random() * 10 - 5);
-            attackedFlight.longitude += (Math.random() * 10 - 5);
-            attackedFlight.altitude += Math.floor(Math.random() * 10000);
-            attackedFlight.isSpoofed = true;
-            break;
-            
-          case 'tampering':
-            // Make altitude changes much larger to trigger tampering detection
-            // Add ±15km altitude change which should trigger the 10km detection
-            attackedFlight.altitude += Math.floor(Math.random() * 30000) - 15000;
-            attackedFlight.velocity = (attackedFlight.velocity || 0) + Math.floor(Math.random() * 200);
-            break;
-            
-          default:
-            throw new Error('Unknown attack type');
-        }
-
-        // Actually try to submit the malicious data to blockchain
-        const txResult = await this.blockchainSystem.addFlightDataWithDetails(attackedFlight);
-        blockchainLogger.log('success', 'Attack simulation: Data accepted by blockchain', { attackType, targetFlight });
-        return {
-          attackType,
-          targetFlight,
-          attackedFlight,
-          transactionHash: txResult?.transactionHash,
-          blockNumber: txResult?.blockNumber,
-          detectedByBlockchain: false,
-          message: 'Attack Succeeded: The malicious data was accepted by the blockchain.',
-          eventLogs: txResult?.eventLogs || []
-        };
-      } catch (error) {
-        blockchainLogger.log('error', 'Attack Prevented by Blockchain', { attackType, targetFlight, reason: error.message });
-        return {
-          attackType,
-          targetFlight,
-          attackedFlight,
-          detectedByBlockchain: true,
-          reason: error.message,
-          message: 'Attack Prevented: The smart contract rejected the malicious transaction.',
-          eventLogs: error.eventLogs || []
-        };
-      }
-    } else {
+    if (!this.blockchainSystem) {
       // Traditional system: always accept
       blockchainLogger.log('success', 'Attack Succeeded (Traditional System)', { attackType, targetFlight });
       return { detectedByTraditional: false };
+    }
+
+    // Initialize attackedFlight with all required properties
+    const attackedFlight = { 
+      ...targetFlight,
+      onGround: typeof targetFlight.onGround === 'boolean' ? targetFlight.onGround : false,
+      isSpoofed: typeof targetFlight.isSpoofed === 'boolean' ? targetFlight.isSpoofed : false,
+      callsign: targetFlight.callsign || targetFlight.icao24,
+      latitude: Number(targetFlight.latitude) || 0,
+      longitude: Number(targetFlight.longitude) || 0,
+      altitude: Number(targetFlight.altitude) || 0,
+      velocity: Number(targetFlight.velocity) || 0,
+      timestamp: targetFlight.timestamp ? new Date(targetFlight.timestamp) : new Date()
+    };
+    
+    try {
+      // Create the attacked flight with more severe modifications
+      switch (attackType) {
+        case 'replay':
+          attackedFlight.timestamp = new Date(attackedFlight.timestamp.getTime() - 3600000);
+          attackedFlight.latitude = Number(attackedFlight.latitude) + (Math.random() * 0.5 - 0.25);
+          attackedFlight.longitude = Number(attackedFlight.longitude) + (Math.random() * 0.5 - 0.25);
+          break;
+        case 'spoofing':
+          attackedFlight.latitude = Number(attackedFlight.latitude) + (Math.random() * 10 - 5);
+          attackedFlight.longitude = Number(attackedFlight.longitude) + (Math.random() * 10 - 5);
+          attackedFlight.altitude = Number(attackedFlight.altitude) + Math.floor(Math.random() * 10000);
+          attackedFlight.isSpoofed = true;
+          break;
+        case 'tampering':
+          attackedFlight.altitude = Number(attackedFlight.altitude) + (Math.floor(Math.random() * 30000) - 15000);
+          attackedFlight.velocity = Number(attackedFlight.velocity) + Math.floor(Math.random() * 200);
+          break;
+        default:
+          throw new Error('Unknown attack type');
+      }
+      // Final defensive check for NaN after all mutations
+      ['latitude','longitude','altitude','velocity'].forEach(field => {
+        if (typeof attackedFlight[field] !== 'number' || isNaN(attackedFlight[field])) {
+          throw new Error(`Invalid value for ${field}: ${attackedFlight[field]}`);
+        }
+      });
+
+      // Actually try to submit the malicious data to blockchain
+      const txResult = await this.blockchainSystem.addFlightDataWithDetails(attackedFlight);
+      blockchainLogger.log('success', 'Attack simulation: Data accepted by blockchain', { attackType, targetFlight });
+      return {
+        attackType,
+        targetFlight,
+        attackedFlight,
+        transactionHash: txResult?.transactionHash,
+        blockNumber: txResult?.blockNumber,
+        detectedByBlockchain: false,
+        message: 'Attack Succeeded: The malicious data was accepted by the blockchain.',
+        eventLogs: txResult?.eventLogs || []
+      };
+    } catch (error) {
+      blockchainLogger.log('error', 'Attack Prevented by Blockchain', { attackType, targetFlight, reason: error.message });
+      return {
+        attackType,
+        targetFlight,
+        attackedFlight,
+        detectedByBlockchain: true,
+        reason: error.message,
+        message: 'Attack Prevented: The smart contract rejected the malicious transaction.',
+        eventLogs: error.eventLogs || []
+      };
     }
   }
 

@@ -220,13 +220,14 @@ class RelayBlockchainSystem {
         body: JSON.stringify({ attackType, targetFlight }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Network response was not ok');
+      const result = await response.json();
+      console.log('Relay /simulate-attack response:', result);
+
+      if (!response.ok || !result.success) {
+        // Only throw for real network/server errors
+        throw new Error(result.error || 'Network response was not ok');
       }
       
-      const result = await response.json();
-
       if (result.detectedByBlockchain) {
         console.log(`✅ Attack Prevented by Relay/Blockchain: ${result.reason}`);
         blockchainLogger.log('error', `Attack Prevented: ${attackType}`, { 

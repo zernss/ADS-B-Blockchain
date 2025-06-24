@@ -95,10 +95,36 @@ function RelayBlockchainPage() {
   }, [initializeRelaySystem]);
 
   const simulateAttack = async (attackType) => {
-    if (!relaySystem || flights.length === 0) return;
+    if (!relaySystem || flights.length === 0) {
+      setError({
+        type: 'attack-error',
+        message: flights.length === 0 ? 'No flights available to attack. Please wait for flight data to load.' : 'Relay system not connected'
+      });
+      return;
+    }
+
     try {
+      setError(null); // Clear any previous errors
       const targetFlight = flights[Math.floor(Math.random() * flights.length)];
-      const result = await relaySystem.simulateAttack(attackType, targetFlight);
+      // Ensure all required fields are present
+      const safeTargetFlight = {
+        icao24: targetFlight.icao24,
+        callsign: targetFlight.callsign || targetFlight.icao24,
+        latitude: targetFlight.latitude,
+        longitude: targetFlight.longitude,
+        altitude: targetFlight.altitude,
+        onGround: typeof targetFlight.onGround === 'boolean' ? targetFlight.onGround : false,
+        isSpoofed: typeof targetFlight.isSpoofed === 'boolean' ? targetFlight.isSpoofed : false
+      };
+      // Log the attempt
+      console.log(`Attempting ${attackType} attack on flight ${safeTargetFlight.callsign}`);
+      console.log('safeTargetFlight sent to relay:', safeTargetFlight);
+      const result = await relaySystem.simulateAttack(attackType, safeTargetFlight);
+      
+      if (!result) {
+        throw new Error('No response from relay server');
+      }
+
       setAttackedFlights(prev => new Set([...prev, targetFlight.icao24]));
       setAttackResults(prev => [{
         timestamp: new Date(),
@@ -110,11 +136,27 @@ function RelayBlockchainPage() {
         attackedFlight: result.attackedFlight,
         eventLogs: result.eventLogs
       }, ...prev].slice(0, 10));
+
     } catch (err) {
-      setError({
-        type: 'attack-error',
-        message: `Failed to simulate ${attackType} attack`
-      });
+      console.error('Attack simulation error:', err);
+      
+      // Handle known error types
+      if (err.message.includes('missing argument')) {
+        setError({
+          type: 'attack-error',
+          message: 'Contract call failed: Missing required flight data'
+        });
+      } else if (err.message.includes('Network response was not ok')) {
+        setError({
+          type: 'attack-error',
+          message: 'Failed to connect to relay server. Please check if the server is running.'
+        });
+      } else {
+        setError({
+          type: 'attack-error',
+          message: `Failed to simulate ${attackType} attack: ${err.message}`
+        });
+      }
     }
   };
 
@@ -219,6 +261,14 @@ function RelayBlockchainPage() {
 
       {activeTab === 0 && (
         <Grid container spacing={3}>
+          <Grid item xs={12}>
+            {error && error.type === 'attack-error' && (
+              <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+                {error.message}
+              </Alert>
+            )}
+          </Grid>
+          
           <Grid item xs={12} md={4}>
             <Card>
               <CardContent>

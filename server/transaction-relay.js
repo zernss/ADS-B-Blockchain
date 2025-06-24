@@ -230,53 +230,169 @@ app.get('/flights/latest/:count', async (req, res) => {
 
 // Simulate attack (no user confirmation needed)
 app.post('/simulate-attack', async (req, res) => {
+  // Print ABI fragment for updateFlight immediately
+  console.log('ABI for updateFlight:', contract.interface.fragments.find(f => f.name === 'updateFlight'));
   try {
     const { attackType, targetFlight } = req.body;
     
     console.log(`⚠️ Simulating ${attackType} attack on ${targetFlight.callsign}`);
+    console.log('Received targetFlight from frontend:', targetFlight);
     
-    const attackedFlight = { ...targetFlight };
+    // Initialize attackedFlight with default values for required properties
+    const attackedFlight = { 
+      ...targetFlight,
+      onGround: targetFlight.onGround || false,
+      isSpoofed: targetFlight.isSpoofed || false,
+      velocity: Number(targetFlight.velocity) || 0,
+      timestamp: targetFlight.timestamp ? new Date(targetFlight.timestamp) : new Date()
+    };
+    console.log('Constructed attackedFlight for contract:', attackedFlight);
+    console.log('Velocity field check:', attackedFlight.velocity);
+    
+    // Defensive check: Ensure all required fields are present
+    const requiredFields = [
+      'icao24', 'callsign', 'latitude', 'longitude', 'altitude', 'onGround', 'isSpoofed'
+    ];
+    for (const field of requiredFields) {
+      if (attackedFlight[field] === undefined || attackedFlight[field] === null) {
+        return res.status(400).json({
+          success: false,
+          error: `Missing required field: ${field}`
+        });
+      }
+    }
+    
+    // Defensive: Ensure numeric fields are valid numbers before mutation
+    attackedFlight.latitude = Number(attackedFlight.latitude) || 0;
+    attackedFlight.longitude = Number(attackedFlight.longitude) || 0;
+    attackedFlight.altitude = Number(attackedFlight.altitude) || 0;
+    
+    console.log('About to start attack simulation for type:', attackType);
     
     switch (attackType) {
       case 'replay':
-        // Make timestamp 1 hour old (should trigger replay detection)
         attackedFlight.timestamp = new Date(new Date(attackedFlight.timestamp).getTime() - 3600000);
-        attackedFlight.latitude += (Math.random() * 0.5 - 0.25);
-        attackedFlight.longitude += (Math.random() * 0.5 - 0.25);
+        attackedFlight.latitude = Number(attackedFlight.latitude) + (Math.random() * 0.5 - 0.25);
+        attackedFlight.longitude = Number(attackedFlight.longitude) + (Math.random() * 0.5 - 0.25);
+        console.log('Replay attack - mutated values:', {
+          latitude: attackedFlight.latitude,
+          longitude: attackedFlight.longitude,
+          timestamp: attackedFlight.timestamp
+        });
         break;
       
       case 'spoofing':
-        // Make position changes much larger to trigger spoofing detection
-        // Add ±5 degrees (roughly 500+ km) which should trigger the 500km detection
-        attackedFlight.latitude += (Math.random() * 10 - 5);
-        attackedFlight.longitude += (Math.random() * 10 - 5);
-        attackedFlight.altitude += Math.floor(Math.random() * 10000);
+        attackedFlight.latitude = Number(attackedFlight.latitude) + (Math.random() * 10 - 5);
+        attackedFlight.longitude = Number(attackedFlight.longitude) + (Math.random() * 10 - 5);
+        attackedFlight.altitude = Number(attackedFlight.altitude) + Math.floor(Math.random() * 10000);
         attackedFlight.isSpoofed = true;
+        console.log('Spoofing attack - mutated values:', {
+          latitude: attackedFlight.latitude,
+          longitude: attackedFlight.longitude,
+          altitude: attackedFlight.altitude,
+          isSpoofed: attackedFlight.isSpoofed
+        });
         break;
         
       case 'tampering':
-        // Make altitude changes much larger to trigger tampering detection
-        // Add ±15km altitude change which should trigger the 10km detection
-        attackedFlight.altitude += Math.floor(Math.random() * 30000) - 15000;
-        attackedFlight.velocity = (attackedFlight.velocity || 0) + Math.floor(Math.random() * 200);
+        console.log('Starting tampering attack simulation...');
+        attackedFlight.altitude = Number(attackedFlight.altitude) + (Math.floor(Math.random() * 30000) - 15000);
+        attackedFlight.velocity = Number(attackedFlight.velocity) + Math.floor(Math.random() * 200);
+        console.log('Tampering attack - mutated values:', {
+          altitude: attackedFlight.altitude,
+          velocity: attackedFlight.velocity
+        });
         break;
         
       default:
         return res.status(400).json({ success: false, error: 'Unknown attack type' });
     }
+    // Final defensive check for NaN after all mutations
+    attackedFlight.latitude = Number(attackedFlight.latitude) || 0;
+    attackedFlight.longitude = Number(attackedFlight.longitude) || 0;
+    attackedFlight.altitude = Number(attackedFlight.altitude) || 0;
+    
+    console.log('Final attackedFlight after mutations:', {
+      icao24: attackedFlight.icao24,
+      callsign: attackedFlight.callsign,
+      latitude: attackedFlight.latitude,
+      longitude: attackedFlight.longitude,
+      altitude: attackedFlight.altitude,
+      onGround: attackedFlight.onGround,
+      isSpoofed: attackedFlight.isSpoofed
+    });
+    
+    // Ensure timestamp is always valid
+    if (!attackedFlight.timestamp) {
+      attackedFlight.timestamp = new Date();
+    }
+    
+    // Pre-validate using the smart contract's validation function
+    let timestamp = Math.floor(new Date(attackedFlight.timestamp).getTime() / 1000);
+    let [valid, reason] = await contract.validateFlightUpdate(
+      attackedFlight.icao24,
+      Math.floor(attackedFlight.latitude * 1e6),
+      Math.floor(attackedFlight.longitude * 1e6),
+      Math.floor(attackedFlight.altitude),
+      timestamp
+    );
+    if (!valid) {
+      const response = {
+        success: true,
+        attackType,
+        targetFlight,
+        attackedFlight,
+        detectedByBlockchain: true,
+        reason,
+        message: `Attack Prevented (pre-validation): ${reason}`,
+        eventLogs: []
+      };
+      console.log('🛡️ Attack blocked by pre-validation:', response);
+      return res.status(200).json(response);
+    }
     
     try {
+      // Log argument values and types before contract call
+      const updateFlightArgs = [
+        attackedFlight.icao24,
+        attackedFlight.callsign || '',
+        Math.floor(attackedFlight.latitude * 1e6),
+        Math.floor(attackedFlight.longitude * 1e6),
+        Math.floor(attackedFlight.altitude),
+        attackedFlight.onGround,
+        attackedFlight.isSpoofed
+      ];
+      console.log('updateFlight args:', updateFlightArgs);
+      console.log('updateFlight arg types:', updateFlightArgs.map(x => typeof x));
+      console.log('updateFlight arg values (detailed):', {
+        icao24: updateFlightArgs[0],
+        callsign: updateFlightArgs[1],
+        latitude: updateFlightArgs[2],
+        longitude: updateFlightArgs[3],
+        altitude: updateFlightArgs[4],
+        onGround: updateFlightArgs[5],
+        isSpoofed: updateFlightArgs[6]
+      });
+      // Defensive check for NaN or undefined
+      for (let i = 0; i < updateFlightArgs.length; i++) {
+        if (updateFlightArgs[i] === undefined || updateFlightArgs[i] === null || (typeof updateFlightArgs[i] === 'number' && isNaN(updateFlightArgs[i]))) {
+          console.error(`Invalid argument at position ${i}:`, updateFlightArgs[i]);
+          return res.status(400).json({
+            success: false,
+            error: `Invalid argument at position ${i}: ${updateFlightArgs[i]}`
+          });
+        }
+      }
+
       // Add the attacked flight to blockchain
-      const nonce = await provider.getTransactionCount(wallet.address, 'latest');
       const tx = await contract.updateFlight(
         attackedFlight.icao24,
         attackedFlight.callsign || '',
         Math.floor(attackedFlight.latitude * 1e6),
         Math.floor(attackedFlight.longitude * 1e6),
         Math.floor(attackedFlight.altitude),
-        attackedFlight.onGround || false,
-        attackedFlight.isSpoofed || false,
-        { nonce }
+        attackedFlight.onGround,
+        attackedFlight.isSpoofed
       );
       
       const receipt = await tx.wait();
@@ -297,11 +413,7 @@ app.post('/simulate-attack', async (req, res) => {
         }
       }
 
-      console.log(`✅ Attack Succeeded (Data Accepted by Blockchain)!`);
-      console.log(`   Transaction: ${tx.hash}`);
-      console.log(`   Attack type: ${attackType}`);
-
-      res.json({
+      const response = {
         success: true,
         attackType,
         targetFlight,
@@ -311,7 +423,9 @@ app.post('/simulate-attack', async (req, res) => {
         detectedByBlockchain: false,
         message: "Attack Succeeded: The malicious data was accepted by the blockchain.",
         eventLogs
-      });
+      };
+      console.log('✅ Attack accepted by blockchain:', response);
+      res.status(200).json(response);
 
     } catch (error) {
       // Try to parse event logs from the error receipt if available
@@ -329,9 +443,8 @@ app.post('/simulate-attack', async (req, res) => {
           }
         }
       }
-      console.error(`❌ Attack Prevented by Blockchain: ${error.reason || error.message}`);
-      res.json({
-        success: true, // The API call itself was successful
+      const response = {
+        success: true,
         attackType,
         targetFlight,
         attackedFlight,
@@ -339,7 +452,9 @@ app.post('/simulate-attack', async (req, res) => {
         reason: error.reason || "Transaction reverted by smart contract.",
         message: "Attack Prevented: The smart contract rejected the malicious transaction.",
         eventLogs
-      });
+      };
+      console.log('🛡️ Attack blocked by blockchain:', response);
+      res.status(200).json(response);
     }
     
   } catch (error) {

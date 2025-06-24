@@ -262,4 +262,35 @@ contract AdsbData {
     function abs(int256 x) private pure returns (int256) {
         return x >= 0 ? x : -x;
     }
+
+    function validateFlightUpdate(
+        string memory _icao24,
+        int256 _latitude,
+        int256 _longitude,
+        int256 _altitude,
+        uint256 _timestamp
+    ) public view returns (bool valid, string memory reason) {
+        Flight storage prev = latestFlights[_icao24];
+        if (bytes(prev.icao24).length > 0) {
+            if (_timestamp <= prev.timestamp) {
+                return (false, "Replay attack: timestamp not newer");
+            }
+            int256 dLat = _latitude - prev.latitude;
+            int256 dLon = _longitude - prev.longitude;
+            int256 dLatDeg = dLat / 1000000;
+            int256 dLonDeg = dLon / 1000000;
+            int256 distMeters = abs(dLatDeg) * 111000 + abs(dLonDeg) * 85000;
+            uint256 dt = _timestamp - prev.timestamp;
+            if (dt > 0) {
+                if (distMeters > 500000 && dt < 60) {
+                    return (false, "Spoofing: impossible position jump");
+                }
+                int256 dAlt = _altitude - prev.altitude;
+                if (abs(dAlt) > 1000000 && dt < 60) {
+                    return (false, "Tampering: impossible altitude jump");
+                }
+            }
+        }
+        return (true, "Valid update");
+    }
 }
