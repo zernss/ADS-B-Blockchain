@@ -75,16 +75,22 @@ contract AdsbData {
             int256 distMeters = abs(dLatDeg) * 111000 + abs(dLonDeg) * 85000;
             uint256 dt = currentTime - prev.timestamp;
             if (dt > 0) {
-                // If >500km in 1 min, reject
-                if (distMeters > 500000 && dt < 60) {
-                    emit FlightRejected(_icao24, "Spoofing: impossible position jump");
-                    revert("Spoofing: impossible position jump");
-                }
-                // If >10,000m altitude change in 1 min, reject
+                // Block any altitude jump >500m regardless of time
                 int256 dAlt = _altitude - prev.altitude;
-                if (abs(dAlt) > 1000000 && dt < 60) {
+                if (abs(dAlt) > 50000) {
                     emit FlightRejected(_icao24, "Tampering: impossible altitude jump");
                     revert("Tampering: impossible altitude jump");
+                }
+                // Block if rate of altitude change >10 m/s
+                int256 rate = abs(dAlt) / int256(dt);
+                if (rate > 10) {
+                    emit FlightRejected(_icao24, "Tampering: impossible altitude rate");
+                    revert("Tampering: impossible altitude rate");
+                }
+                // Spoofing check remains
+                if (distMeters > 100000 && dt < 300) {
+                    emit FlightRejected(_icao24, "Spoofing: impossible position jump");
+                    revert("Spoofing: impossible position jump");
                 }
             }
         }
@@ -158,14 +164,21 @@ contract AdsbData {
                 int256 distMeters = abs(dLatDeg) * 111000 + abs(dLonDeg) * 85000;
                 uint256 dt = currentTime - prev.timestamp;
                 if (dt > 0) {
-                    if (distMeters > 500000 && dt < 60) {
-                        emit FlightRejected(_icao24s[i], "Spoofing: impossible position jump");
-                        revert("Spoofing: impossible position jump");
-                    }
+                    // Block any altitude jump >500m regardless of time
                     int256 dAlt = _altitudes[i] - prev.altitude;
-                    if (abs(dAlt) > 1000000 && dt < 60) {
+                    if (abs(dAlt) > 50000) {
                         emit FlightRejected(_icao24s[i], "Tampering: impossible altitude jump");
                         revert("Tampering: impossible altitude jump");
+                    }
+                    // Block if rate of altitude change >10 m/s
+                    int256 rate = abs(dAlt) / int256(dt);
+                    if (rate > 10) {
+                        emit FlightRejected(_icao24s[i], "Tampering: impossible altitude rate");
+                        revert("Tampering: impossible altitude rate");
+                    }
+                    if (distMeters > 100000 && dt < 300) {
+                        emit FlightRejected(_icao24s[i], "Spoofing: impossible position jump");
+                        revert("Spoofing: impossible position jump");
                     }
                 }
             }
@@ -282,12 +295,18 @@ contract AdsbData {
             int256 distMeters = abs(dLatDeg) * 111000 + abs(dLonDeg) * 85000;
             uint256 dt = _timestamp - prev.timestamp;
             if (dt > 0) {
-                if (distMeters > 500000 && dt < 60) {
-                    return (false, "Spoofing: impossible position jump");
-                }
+                // Block any altitude jump >500m regardless of time
                 int256 dAlt = _altitude - prev.altitude;
-                if (abs(dAlt) > 1000000 && dt < 60) {
+                if (abs(dAlt) > 50000) {
                     return (false, "Tampering: impossible altitude jump");
+                }
+                // Block if rate of altitude change >10 m/s
+                int256 rate = abs(dAlt) / int256(dt);
+                if (rate > 10) {
+                    return (false, "Tampering: impossible altitude rate");
+                }
+                if (distMeters > 100000 && dt < 300) {
+                    return (false, "Spoofing: impossible position jump");
                 }
             }
         }
