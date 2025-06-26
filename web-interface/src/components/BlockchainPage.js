@@ -4,7 +4,9 @@ import { Box, Typography, Card, CardContent, Button, Alert, CircularProgress, Gr
 import Map from './Map';
 import BlockchainInfo from './BlockchainInfo';
 import BlockchainLoggerComponent from './BlockchainLogger';
+import BlockchainActivityLogger from './BlockchainActivityLogger';
 import FlightDataService from '../services/FlightDataService';
+import blockchainLogger from '../services/BlockchainLogger';
 import AdsbDataABI from '../contracts/AdsbData.json';
 import config from '../config.json';
 import FlightDetails from './FlightDetails';
@@ -94,6 +96,10 @@ function BlockchainPage() {
       const service = new FlightDataService(newContract);
       setFlightService(service);
       setIsConnected(true);
+      
+      // Initialize blockchain monitoring
+      blockchainLogger.initializeBlockchainMonitoring(provider, newContract);
+      
       setLoading(false);
       await service.start();
     } catch (err) {
@@ -385,6 +391,7 @@ function BlockchainPage() {
               <Tab label="Flight Map" />
               <Tab label="Blockchain Info" />
               <Tab label="Network Logger" />
+              <Tab label="🔗 Blockchain Activity" />
             </Tabs>
           </Paper>
         </Grid>
@@ -418,6 +425,12 @@ function BlockchainPage() {
               provider={contract?.provider} 
               isConnected={!!contract} 
             />
+          </Grid>
+        )}
+
+        {activeTab === 3 && (
+          <Grid item xs={12}>
+            <BlockchainActivityLogger />
           </Grid>
         )}
 

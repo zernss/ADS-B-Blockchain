@@ -59,6 +59,11 @@ class BlockchainSystem {
         altitude: flight.altitude
       });
 
+      // Get current nonce for logging
+      const signer = this.contract.signer;
+      const nonce = await signer.getTransactionCount();
+      blockchainLogger.logNonceChange(nonce, 'Before flight data transaction');
+
       const tx = await this.contract.updateFlight(
         flight.icao24,
         flight.callsign || '',
@@ -69,12 +74,24 @@ class BlockchainSystem {
         flight.isSpoofed || false
       );
 
+      blockchainLogger.logTransaction(tx.hash, 'Flight data update', {
+        icao24: flight.icao24,
+        nonce: nonce
+      });
+
       blockchainLogger.log('transaction', 'Flight data transaction submitted', {
         transactionHash: tx.hash,
         icao24: flight.icao24
       });
 
       const receipt = await tx.wait();
+      
+      // Log gas usage details
+      const gasUsed = receipt.gasUsed;
+      const gasPrice = tx.gasPrice;
+      const totalCost = gasUsed.mul(gasPrice);
+      
+      blockchainLogger.logGasUsage(gasUsed.toString(), gasPrice.toString(), totalCost.toString());
       
       blockchainLogger.log('success', 'Flight data added to blockchain successfully', {
         transactionHash: tx.hash,
@@ -134,6 +151,11 @@ class BlockchainSystem {
         icao24s: flights.map(f => f.icao24)
       });
 
+      // Get current nonce for logging
+      const signer = this.contract.signer;
+      const nonce = await signer.getTransactionCount();
+      blockchainLogger.logNonceChange(nonce, 'Before batch transaction');
+
       const icao24s = flights.map(f => f.icao24);
       const callsigns = flights.map(f => f.callsign || '');
       const latitudes = flights.map(f => Math.floor(f.latitude * 1e6));
@@ -152,12 +174,24 @@ class BlockchainSystem {
         isSpoofedFlags
       );
 
+      blockchainLogger.logTransaction(tx.hash, 'Flight data batch update', {
+        count: flights.length,
+        nonce: nonce
+      });
+
       blockchainLogger.log('transaction', 'Flight data batch transaction submitted', {
         transactionHash: tx.hash,
         count: flights.length
       });
 
       const receipt = await tx.wait();
+      
+      // Log gas usage details
+      const gasUsed = receipt.gasUsed;
+      const gasPrice = tx.gasPrice;
+      const totalCost = gasUsed.mul(gasPrice);
+      
+      blockchainLogger.logGasUsage(gasUsed.toString(), gasPrice.toString(), totalCost.toString());
       
       blockchainLogger.log('success', 'Flight data batch added to blockchain successfully', {
         transactionHash: tx.hash,
@@ -421,6 +455,13 @@ class FlightDataService {
       return { detectedByTraditional: false };
     }
 
+    // Log attack attempt
+    blockchainLogger.logBlockchainActivity('attack', `Attack Simulation Started: ${attackType}`, {
+      attackType: attackType,
+      targetFlight: targetFlight.icao24,
+      callsign: targetFlight.callsign
+    });
+
     // Initialize attackedFlight with all required properties
     const attackedFlight = { 
       ...targetFlight,
@@ -448,6 +489,12 @@ class FlightDataService {
       } else {
         reason = 'Blocked by blockchain validation';
       }
+      
+      blockchainLogger.logBlockchainActivity('rejection', `Attack Prevented: ${attackType}`, {
+        attackType: attackType,
+        targetFlight: targetFlight.icao24,
+        reason: reason
+      });
       
       blockchainLogger.log('error', 'Attack Prevented by Randomizer (MetaMask System)', { 
         attackType, 
@@ -482,7 +529,7 @@ class FlightDataService {
           break;
         case 'tampering':
           attackedFlight.altitude = Number(attackedFlight.altitude) + (Math.floor(Math.random() * 2000) - 1000); // Smaller altitude change
-          attackedFlight.velocity = Number(attackedFlight.velocity) + Math.floor(Math.random() * 50); // Smaller velocity change
+          attackedFlight.velocity = Number(attackedFlight.velocity) + Math.floor(Math.random() * 50); // Smaller velocity change;
           break;
         default:
           throw new Error('Unknown attack type');
@@ -494,8 +541,28 @@ class FlightDataService {
         }
       });
 
+      // Log attack data being submitted
+      blockchainLogger.logBlockchainActivity('transaction', `Attack Data Submission: ${attackType}`, {
+        attackType: attackType,
+        targetFlight: targetFlight.icao24,
+        originalLatitude: targetFlight.latitude,
+        originalLongitude: targetFlight.longitude,
+        originalAltitude: targetFlight.altitude,
+        modifiedLatitude: attackedFlight.latitude,
+        modifiedLongitude: attackedFlight.longitude,
+        modifiedAltitude: attackedFlight.altitude
+      });
+
       // Actually try to submit the malicious data to blockchain
       const txResult = await this.blockchainSystem.addFlightDataWithDetails(attackedFlight);
+      
+      blockchainLogger.logBlockchainActivity('event', `Attack Succeeded: ${attackType}`, {
+        attackType: attackType,
+        targetFlight: targetFlight.icao24,
+        transactionHash: txResult?.transactionHash,
+        blockNumber: txResult?.blockNumber
+      });
+      
       blockchainLogger.log('success', 'Attack simulation: Data accepted by blockchain', { attackType, targetFlight });
       return {
         attackType,
@@ -523,6 +590,14 @@ class FlightDataService {
       if (match && match[1]) {
         reason = match[1];
       }
+      
+      blockchainLogger.logBlockchainActivity('rejection', `Attack Blocked by Smart Contract: ${attackType}`, {
+        attackType: attackType,
+        targetFlight: targetFlight.icao24,
+        reason: reason,
+        errorMessage: error.message
+      });
+      
       blockchainLogger.log('error', 'Attack Prevented by Blockchain', { attackType, targetFlight, reason });
       return {
         attackType,

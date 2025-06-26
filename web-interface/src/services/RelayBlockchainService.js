@@ -56,6 +56,16 @@ class RelayBlockchainSystem {
       const result = await response.json();
       
       if (result.success) {
+        // Log blockchain activity
+        blockchainLogger.logTransaction(result.transactionHash, 'Flight data via relay', {
+          icao24: flight.icao24,
+          blockNumber: result.blockNumber
+        });
+        
+        if (result.gasUsed) {
+          blockchainLogger.logGasUsage(result.gasUsed, result.gasPrice || '0', result.totalCost || '0');
+        }
+        
         blockchainLogger.log('success', 'Data penerbangan berhasil ditambah melalui server relay', {
           transactionHash: result.transactionHash,
           blockNumber: result.blockNumber,
@@ -119,6 +129,16 @@ class RelayBlockchainSystem {
       const result = await response.json();
       
       if (result.success) {
+        // Log blockchain activity
+        blockchainLogger.logTransaction(result.transactionHash, 'Flight batch via relay', {
+          count: flights.length,
+          blockNumber: result.blockNumber
+        });
+        
+        if (result.gasUsed) {
+          blockchainLogger.logGasUsage(result.gasUsed, result.gasPrice || '0', result.totalCost || '0');
+        }
+        
         blockchainLogger.log('success', 'Batch data penerbangan berhasil ditambah melalui server relay', {
           transactionHash: result.transactionHash,
           blockNumber: result.blockNumber,
@@ -229,6 +249,13 @@ class RelayBlockchainSystem {
 
   async simulateAttack(attackType, targetFlight) {
     try {
+      // Log attack attempt
+      blockchainLogger.logBlockchainActivity('attack', `Attack Simulation Started (Relay): ${attackType}`, {
+        attackType: attackType,
+        targetFlight: targetFlight.icao24,
+        callsign: targetFlight.callsign
+      });
+
       const response = await fetch(`${this.relayUrl}/simulate-attack`, {
         method: 'POST',
         headers: {
@@ -246,6 +273,13 @@ class RelayBlockchainSystem {
       }
       
       if (result.detectedByBlockchain) {
+        // Log rejection
+        blockchainLogger.logBlockchainActivity('rejection', `Attack Prevented (Relay): ${attackType}`, {
+          attackType: attackType,
+          targetFlight: targetFlight.icao24,
+          reason: result.reason
+        });
+        
         console.log(`✅ Serangan Dicegah oleh Relay/Blockchain: ${result.reason}`);
         blockchainLogger.log('error', `Serangan Dicegah: ${attackType}`, { 
           reason: result.reason,
@@ -253,6 +287,21 @@ class RelayBlockchainSystem {
           eventLogs: result.eventLogs
         });
       } else {
+        // Log successful attack
+        blockchainLogger.logBlockchainActivity('event', `Attack Succeeded (Relay): ${attackType}`, {
+          attackType: attackType,
+          targetFlight: targetFlight.icao24,
+          transactionHash: result.transactionHash,
+          blockNumber: result.blockNumber
+        });
+        
+        if (result.transactionHash) {
+          blockchainLogger.logTransaction(result.transactionHash, `Attack via relay: ${attackType}`, {
+            attackType: attackType,
+            targetFlight: targetFlight.icao24
+          });
+        }
+        
         console.log(`SERANGAN BERHASIL pada sistem Relay. Hash: ${result.transactionHash}`);
         blockchainLogger.log('success', `Serangan Berhasil: ${attackType}`, {
           transaction: result.transactionHash,

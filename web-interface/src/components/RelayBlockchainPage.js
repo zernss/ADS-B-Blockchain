@@ -3,6 +3,7 @@ import { Box, Typography, Card, CardContent, Button, Alert, CircularProgress, Gr
 import { ethers } from 'ethers';
 import Map from './Map';
 import BlockchainLoggerComponent from './BlockchainLogger';
+import BlockchainActivityLogger from './BlockchainActivityLogger';
 import FlightDetails from './FlightDetails';
 import RelayBlockchainSystem from '../services/RelayBlockchainService';
 import { fetchFlightData } from '../services/OpenSkyService';
@@ -97,6 +98,9 @@ function RelayBlockchainPage() {
         setRelaySystem(system);
         setConnectionStatus('connected');
         
+        // Initialize blockchain monitoring
+        blockchainLogger.initializeBlockchainMonitoring(readOnlyProvider, null);
+        
         // First load existing flights from blockchain
         await loadExistingFlights(system);
         
@@ -119,7 +123,7 @@ function RelayBlockchainPage() {
     } finally {
       setLoading(false);
     }
-  }, [startService, loadExistingFlights]);
+  }, [startService, loadExistingFlights, readOnlyProvider]);
 
   useEffect(() => {
     initializeRelaySystem();
@@ -291,6 +295,7 @@ function RelayBlockchainPage() {
       <Tabs value={activeTab} onChange={handleTabChange} sx={{ mb: 3 }}>
         <Tab label="Flight Map" />
         <Tab label="Network Logger" />
+        <Tab label="🔗 Blockchain Activity" />
       </Tabs>
 
       {activeTab === 0 && (
@@ -474,6 +479,10 @@ function RelayBlockchainPage() {
           provider={readOnlyProvider} 
           isConnected={connectionStatus === 'connected'} 
         />
+      )}
+
+      {activeTab === 2 && (
+        <BlockchainActivityLogger />
       )}
     </Box>
   );
