@@ -85,6 +85,23 @@ class RelayBlockchainSystem {
       return false;
     }
     
+    // Add batch size limit and chunking
+    const MAX_BATCH_SIZE = 50;
+    if (flights.length > MAX_BATCH_SIZE) {
+      blockchainLogger.log('warning', 'Batch size too large, splitting into chunks', {
+        totalFlights: flights.length,
+        maxBatchSize: MAX_BATCH_SIZE
+      });
+
+      let allSuccess = true;
+      for (let i = 0; i < flights.length; i += MAX_BATCH_SIZE) {
+        const chunk = flights.slice(i, i + MAX_BATCH_SIZE);
+        const result = await this.addFlightDataBatch(chunk);
+        if (!result) allSuccess = false;
+      }
+      return allSuccess;
+    }
+    
     try {
       blockchainLogger.log('info', 'Adding flight data batch via relay server', {
         count: flights.length,

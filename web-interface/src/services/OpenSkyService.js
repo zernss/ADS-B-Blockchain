@@ -29,10 +29,19 @@ const processFlightData = (state) => {
     verticalRate
   ] = state;
 
-  // Skip if essential data is missing or invalid
-  if (!icao24 || !latitude || !longitude || 
+  // Enhanced validation for flight data
+  if (!icao24 || 
+      !latitude || !longitude || 
       isNaN(parseFloat(latitude)) || isNaN(parseFloat(longitude)) ||
-      Math.abs(parseFloat(latitude)) > 90 || Math.abs(parseFloat(longitude)) > 180) {
+      Math.abs(parseFloat(latitude)) > 90 || Math.abs(parseFloat(longitude)) > 180 ||
+      !baroAltitude || isNaN(parseFloat(baroAltitude)) || parseFloat(baroAltitude) < -1000 ||
+      !callsign || callsign.trim() === '') {
+    return null;
+  }
+
+  // Additional validation for reasonable altitude values
+  const altitude = parseFloat(baroAltitude);
+  if (altitude > 50000) { // Max 50km altitude
     return null;
   }
 
@@ -42,7 +51,7 @@ const processFlightData = (state) => {
     origin_country,
     latitude: parseFloat(latitude),
     longitude: parseFloat(longitude),
-    altitude: baroAltitude ? parseFloat(baroAltitude) : 0,
+    altitude: altitude,
     onGround: Boolean(onGround),
     velocity: velocity ? parseFloat(velocity) : 0,
     heading: heading ? parseFloat(heading) : 0,

@@ -1,5 +1,6 @@
 import { fetchFlightData } from './OpenSkyService';
 import blockchainLogger from './BlockchainLogger';
+import traditionalLogger from './TraditionalLogger';
 
 class TraditionalSystem {
   constructor() {
@@ -9,7 +10,7 @@ class TraditionalSystem {
 
   async addFlightData(flight) {
     this.flights.set(flight.icao24, flight);
-    blockchainLogger.log('info', 'Flight data added to traditional system', {
+    traditionalLogger.log('info', 'Flight data added to traditional system', {
       icao24: flight.icao24,
       callsign: flight.callsign,
       latitude: flight.latitude,
@@ -22,7 +23,7 @@ class TraditionalSystem {
   async verifyFlightData(icao24) {
     await new Promise(resolve => setTimeout(resolve, this.verificationDelay));
     const exists = this.flights.has(icao24);
-    blockchainLogger.log('info', 'Flight data verified in traditional system', {
+    traditionalLogger.log('info', 'Flight data verified in traditional system', {
       icao24,
       verified: exists
     });
@@ -96,6 +97,35 @@ class BlockchainSystem {
     if (!this.contract) {
       blockchainLogger.log('error', 'Cannot add flight data batch: Contract not available');
       return false;
+    }
+    
+    // Add batch size limit
+    if (flights.length > 50) {
+      blockchainLogger.log('warning', 'Batch size too large, processing in chunks', {
+        totalFlights: flights.length,
+        maxBatchSize: 50
+      });
+      
+      // Process in chunks of 50
+      const chunks = [];
+      for (let i = 0; i < flights.length; i += 50) {
+        chunks.push(flights.slice(i, i + 50));
+      }
+      
+      let successCount = 0;
+      for (const chunk of chunks) {
+        try {
+          const result = await this.addFlightDataBatch(chunk);
+          if (result) successCount++;
+        } catch (error) {
+          blockchainLogger.log('error', 'Failed to process batch chunk', {
+            chunkSize: chunk.length,
+            error: error.message
+          });
+        }
+      }
+      
+      return successCount === chunks.length;
     }
     
     try {
@@ -387,7 +417,7 @@ class FlightDataService {
   async simulateAttack(attackType, targetFlight) {
     if (!this.blockchainSystem) {
       // Traditional system: always accept
-      blockchainLogger.log('success', 'Attack Succeeded (Traditional System)', { attackType, targetFlight });
+      traditionalLogger.log('success', 'Attack Succeeded (Traditional System)', { attackType, targetFlight });
       return { detectedByTraditional: false };
     }
 

@@ -117,52 +117,167 @@ app.post('/add-flights-batch', async (req, res) => {
       });
     }
     
+    // Add batch size validation
+    if (flights.length > 50) {
+      return res.status(400).json({
+        success: false,
+        error: 'Batch size too large (max 50 flights)'
+      });
+    }
+    
     console.log(`📦 Adding ${flights.length} flights in batch...`);
     
-    const icao24s = flights.map(f => f.icao24);
-    const callsigns = flights.map(f => f.callsign || '');
-    const latitudes = flights.map(f => Math.floor(f.latitude * 1e6));
-    const longitudes = flights.map(f => Math.floor(f.longitude * 1e6));
-    const altitudes = flights.map(f => Math.floor(f.altitude));
-    const onGrounds = flights.map(f => f.onGround || false);
-    const isSpoofedFlags = flights.map(f => f.isSpoofed || false);
-
-    // Fetch the latest nonce
-    const nonce = await provider.getTransactionCount(wallet.address, 'latest');
+    // Validate each flight before processing
+    const validFlights = [];
+    const invalidFlights = [];
     
-    const tx = await contract.updateFlightBatch(
+    for (const flight of flights) {
+      if (flight.icao24 && 
+          typeof flight.latitude === 'number' && !isNaN(flight.latitude) &&
+          typeof flight.longitude === 'number' && !isNaN(flight.longitude) &&
+          typeof flight.altitude === 'number' && !isNaN(flight.altitude)) {
+        validFlights.push(flight);
+      } else {
+        invalidFlights.push(flight);
+        console.warn('Invalid flight data:', flight);
+      }
+    }
+    
+    if (validFlights.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'No valid flights found in batch'
+      });
+    }
+    
+    if (invalidFlights.length > 0) {
+      console.log(`⚠️ Filtered out ${invalidFlights.length} invalid flights`);
+    }
+    
+    // Log the batch to be sent
+    const icao24s = validFlights.map(f => f.icao24);
+    const callsigns = validFlights.map(f => f.callsign || '');
+    const latitudes = validFlights.map(f => Math.floor(f.latitude * 1e6));
+    const longitudes = validFlights.map(f => Math.floor(f.longitude * 1e6));
+    const altitudes = validFlights.map(f => Math.floor(f.altitude));
+    const onGrounds = validFlights.map(f => f.onGround || false);
+    const isSpoofedFlags = validFlights.map(f => f.isSpoofed || false);
+    console.log('Batch to be sent:', {
       icao24s,
       callsigns,
       latitudes,
       longitudes,
       altitudes,
       onGrounds,
-      isSpoofedFlags,
-      { nonce }
-    );
+      isSpoofedFlags
+    });
+
+    // Helper for dynamic batch splitting
+    async function tryBatch(batch, batchGasLimit) {
+      try {
+        const icao24s = batch.map(f => f.icao24);
+        const callsigns = batch.map(f => f.callsign || '');
+        const latitudes = batch.map(f => Math.floor(f.latitude * 1e6));
+        const longitudes = batch.map(f => Math.floor(f.longitude * 1e6));
+        const altitudes = batch.map(f => Math.floor(f.altitude));
+        const onGrounds = batch.map(f => f.onGround || false);
+        const isSpoofedFlags = batch.map(f => f.isSpoofed || false);
+        const nonce = await provider.getTransactionCount(wallet.address, 'latest');
+        console.log(`🚀 Sending batch of ${batch.length} flights with gasLimit ${batchGasLimit}`);
+        const tx = await contract.updateFlightBatch(
+          icao24s,
+          callsigns,
+          latitudes,
+          longitudes,
+          altitudes,
+          onGrounds,
+          isSpoofedFlags,
+          { nonce, gasLimit: batchGasLimit }
+        );
+        const receipt = await tx.wait();
+        console.log(`✅ Batch transaction successful! Hash: ${tx.hash}`);
+        return { success: true, tx, receipt, batch };
+      } catch (error) {
+        console.error('❌ Batch failed:', error.message);
+        return { success: false, error, batch };
+      }
+    }
+
+    // Dynamic batch splitting logic
+    let batchSize = validFlights.length;
+    let batchGasLimit = 8000000;
+    let batches = [validFlights];
+    let allResults = [];
+    let minBatchSize = 1;
+    let maxRetries = 3;
+    let retryCount = 0;
+    while (batches.length > 0 && retryCount < maxRetries) {
+      let nextBatches = [];
+      for (const batch of batches) {
+        if (batch.length === 0) continue;
+        const result = await tryBatch(batch, batchGasLimit);
+        if (result.success) {
+          allResults.push(result);
+        } else {
+          // If batch fails and is larger than minBatchSize, split and retry
+          if (batch.length > minBatchSize) {
+            const mid = Math.floor(batch.length / 2);
+            nextBatches.push(batch.slice(0, mid));
+            nextBatches.push(batch.slice(mid));
+            console.log(`🔄 Splitting batch of ${batch.length} into ${batch.slice(0, mid).length} and ${batch.slice(mid).length}`);
+          } else {
+            // If single flight fails, log and skip
+            console.warn('⚠️ Skipping flight due to repeated failure:', batch[0]);
+            allResults.push({ success: false, error: result.error, batch });
+          }
+        }
+      }
+      batches = nextBatches;
+      retryCount++;
+    }
+
+    // Summarize results
+    const successfulBatches = allResults.filter(r => r.success);
+    const failedBatches = allResults.filter(r => !r.success);
+    console.log(`✅ Successful batches: ${successfulBatches.length}, ❌ Failed batches: ${failedBatches.length}`);
     
-    const receipt = await tx.wait();
+    if (successfulBatches.length === 0) {
+      return res.status(500).json({
+        success: false,
+        error: 'All batches failed. See server logs for details.',
+        failedBatches: failedBatches.map(fb => ({ error: fb.error?.message, batch: fb.batch }))
+      });
+    }
     
-    console.log(`✅ Batch transaction successful!`);
-    console.log(`   Transaction: ${tx.hash}`);
-    console.log(`   Block: ${receipt.blockNumber}`);
-    console.log(`   Gas used: ${receipt.gasUsed.toString()}`);
-    console.log(`   Flights added: ${flights.length}`);
-    
-    res.json({
+    // Return info about successful batches
+    return res.json({
       success: true,
-      transactionHash: tx.hash,
-      blockNumber: receipt.blockNumber,
-      gasUsed: receipt.gasUsed.toString(),
-      flightsCount: flights.length,
-      flights: flights
+      successfulBatches: successfulBatches.length,
+      failedBatches: failedBatches.length,
+      transactions: successfulBatches.map(sb => ({
+        transactionHash: sb.tx.hash,
+        blockNumber: sb.receipt.blockNumber,
+        gasUsed: sb.receipt.gasUsed.toString(),
+        flightsCount: sb.batch.length
+      })),
+      failedFlights: failedBatches.flatMap(fb => fb.batch)
     });
     
   } catch (error) {
     console.error('Error adding flights batch:', error);
+    
+    // Provide more detailed error information
+    let errorMessage = error.message;
+    if (error.reason) {
+      errorMessage = error.reason;
+    } else if (error.error && error.error.message) {
+      errorMessage = error.error.message;
+    }
+    
     res.status(500).json({ 
       success: false,
-      error: error.message 
+      error: errorMessage,
+      details: error.toString()
     });
   }
 });

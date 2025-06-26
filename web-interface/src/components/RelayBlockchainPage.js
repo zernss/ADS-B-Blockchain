@@ -23,11 +23,41 @@ function RelayBlockchainPage() {
     return new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545");
   }, []);
 
+  const loadExistingFlights = useCallback(async (system) => {
+    if (!system) return;
+    
+    try {
+      console.log('Loading existing flights from blockchain...');
+      const existingFlights = await system.getAllFlights();
+      console.log('Loaded existing flights from blockchain:', existingFlights.length);
+      
+      if (existingFlights && existingFlights.length > 0) {
+        setFlights(existingFlights);
+        console.log('Set flights state with existing flights:', existingFlights.length);
+      }
+    } catch (error) {
+      console.error('Failed to load existing flights:', error);
+      blockchainLogger.log('error', 'Failed to load existing flights from blockchain', { error: error.message });
+    }
+  }, []);
+
   const updateFlightData = useCallback(async (system, forceRefresh = false) => {
     if (!system) return;
     
     try {
-      setUpdateStatus('Fetching flight data from OpenSky Network...');
+      // First, load existing flights from the blockchain
+      setUpdateStatus('Loading existing flights from blockchain...');
+      const existingFlights = await system.getAllFlights();
+      console.log('Loaded existing flights from blockchain:', existingFlights.length);
+      
+      // Set existing flights to display on map
+      if (existingFlights && existingFlights.length > 0) {
+        setFlights(existingFlights);
+        setUpdateStatus(`Loaded ${existingFlights.length} existing flights from blockchain`);
+      }
+      
+      // Then fetch new flight data from OpenSky Network
+      setUpdateStatus('Fetching new flight data from OpenSky Network...');
       const newFlights = await fetchFlightData(forceRefresh);
       
       if (!newFlights || !Array.isArray(newFlights)) {
@@ -37,15 +67,18 @@ function RelayBlockchainPage() {
 
       blockchainLogger.log('info', 'Received flight data from OpenSky Network', { count: newFlights.length });
 
-      setUpdateStatus('Adding flight data to blockchain via relay server...');
+      // Add new flights to blockchain
+      setUpdateStatus('Adding new flight data to blockchain via relay server...');
       const result = await system.addFlightDataBatch(newFlights);
       
       if (result) {
-        setFlights(newFlights);
-        setUpdateStatus(`Successfully added ${newFlights.length} flights to blockchain via relay server`);
-        setTimeout(() => setUpdateStatus(''), 3000);
+        // Combine existing and new flights for display
+        const combinedFlights = [...existingFlights, ...newFlights];
+        setFlights(combinedFlights);
+        setUpdateStatus(`Successfully added ${newFlights.length} new flights to blockchain. Total: ${combinedFlights.length} flights`);
+        setTimeout(() => setUpdateStatus(''), 5000);
       } else {
-        setUpdateStatus('Failed to add flight data to blockchain via relay server');
+        setUpdateStatus('Failed to add new flight data to blockchain via relay server');
       }
     } catch (error) {
       blockchainLogger.log('error', 'Failed to update flight data', { error: error.message });
@@ -70,6 +103,11 @@ function RelayBlockchainPage() {
       if (isConnected) {
         setRelaySystem(system);
         setConnectionStatus('connected');
+        
+        // First load existing flights from blockchain
+        await loadExistingFlights(system);
+        
+        // Then start the service to add new flights
         await startService(system);
       } else {
         setError({
@@ -88,7 +126,7 @@ function RelayBlockchainPage() {
     } finally {
       setLoading(false);
     }
-  }, [startService]);
+  }, [startService, loadExistingFlights]);
 
   useEffect(() => {
     initializeRelaySystem();
@@ -162,6 +200,12 @@ function RelayBlockchainPage() {
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
+  };
+
+  const handleFlightSelect = (flight) => {
+    console.log('Flight selected:', flight);
+    // You can add more functionality here, such as showing flight details in a modal
+    // or highlighting the selected flight on the map
   };
 
   const renderError = (error) => {
@@ -317,6 +361,13 @@ function RelayBlockchainPage() {
                   <Typography variant="h6">Flight Map (Relay Blockchain Secured)</Typography>
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <Button 
+                      variant="outlined" 
+                      onClick={() => loadExistingFlights(relaySystem)} 
+                      disabled={!relaySystem}
+                    >
+                      Load from Blockchain
+                    </Button>
+                    <Button 
                       variant="contained" 
                       onClick={() => updateFlightData(relaySystem, true)} 
                       disabled={!relaySystem || updateStatus.includes('Fetching')}
@@ -335,7 +386,7 @@ function RelayBlockchainPage() {
                   </Alert>
                 )}
                 
-                <Map flights={flights} attackedFlights={attackedFlights} />
+                <Map flights={flights} attackedFlights={attackedFlights} onFlightSelect={handleFlightSelect} />
               </CardContent>
             </Card>
           </Grid>

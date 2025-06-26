@@ -45,7 +45,7 @@ function MapInitializer() {
   return null;
 }
 
-const Map = ({ flights, onFlightSelect }) => {
+const Map = ({ flights, attackedFlights = new Set(), onFlightSelect }) => {
   const mapRef = useRef(null);
 
   if (!flights || flights.length === 0) {
@@ -71,33 +71,47 @@ const Map = ({ flights, onFlightSelect }) => {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
-        {flights.map((flight) => (
-          <Marker
-            key={flight.icao24}
-            position={[flight.latitude, flight.longitude]}
-            icon={flight.isUnderAttack ? attackedIcon : defaultIcon}
-            eventHandlers={{
-              click: () => onFlightSelect(flight),
-            }}
-          >
-            <Popup>
-              <Box>
-                <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
-                  {flight.callsign || flight.icao24}
-                </Typography>
-                <Typography variant="body1">
-                  Altitude: {Math.round(flight.altitude)}m
-                </Typography>
-                <Typography variant="body1">
-                  Speed: {Math.round(flight.velocity * 3.6)} km/h
-                </Typography>
-                <Typography variant="body1">
-                  Status: {flight.isUnderAttack ? 'Under Attack' : 'Normal'}
-                </Typography>
-              </Box>
-            </Popup>
-          </Marker>
-        ))}
+        {flights.map((flight) => {
+          const isAttacked = attackedFlights.has(flight.icao24);
+          return (
+            <Marker
+              key={flight.icao24}
+              position={[flight.latitude, flight.longitude]}
+              icon={isAttacked ? attackedIcon : defaultIcon}
+              eventHandlers={{
+                click: () => onFlightSelect && onFlightSelect(flight),
+              }}
+            >
+              <Popup>
+                <Box>
+                  <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
+                    {flight.callsign || flight.icao24}
+                  </Typography>
+                  <Typography variant="body1">
+                    ICAO24: {flight.icao24}
+                  </Typography>
+                  <Typography variant="body1">
+                    Altitude: {Math.round(flight.altitude)}m
+                  </Typography>
+                  <Typography variant="body1">
+                    Speed: {Math.round((flight.velocity || 0) * 3.6)} km/h
+                  </Typography>
+                  <Typography variant="body1">
+                    Status: {isAttacked ? 'Under Attack' : 'Normal'}
+                  </Typography>
+                  <Typography variant="body1">
+                    Ground: {flight.onGround ? 'Yes' : 'No'}
+                  </Typography>
+                  {flight.isSpoofed && (
+                    <Typography variant="body1" color="error">
+                      ⚠️ Potentially Spoofed
+                    </Typography>
+                  )}
+                </Box>
+              </Popup>
+            </Marker>
+          );
+        })}
       </MapContainer>
     </Box>
   );
