@@ -455,9 +455,10 @@ app.post('/simulate-attack', async (req, res) => {
     console.log('Akan memulai simulasi serangan untuk tipe:', attackType);
     switch (attackType) {
       case 'replay':
-        attackedFlight.timestamp = new Date(new Date(attackedFlight.timestamp).getTime() - 3600000);
-        attackedFlight.latitude = Number(attackedFlight.latitude) + (Math.random() * 0.5 - 0.25);
-        attackedFlight.longitude = Number(attackedFlight.longitude) + (Math.random() * 0.5 - 0.25);
+        // Make replay attack less severe - only change timestamp slightly
+        attackedFlight.timestamp = new Date(new Date(attackedFlight.timestamp).getTime() - 60000); // Only 1 minute back
+        attackedFlight.latitude = Number(attackedFlight.latitude) + (Math.random() * 0.1 - 0.05); // Smaller position change
+        attackedFlight.longitude = Number(attackedFlight.longitude) + (Math.random() * 0.1 - 0.05);
         console.log('Replay attack - nilai yang dimutasi:', {
           latitude: attackedFlight.latitude,
           longitude: attackedFlight.longitude,
@@ -465,9 +466,10 @@ app.post('/simulate-attack', async (req, res) => {
         });
         break;
       case 'spoofing':
-        attackedFlight.latitude = Number(attackedFlight.latitude) + (Math.random() * 10 - 5);
-        attackedFlight.longitude = Number(attackedFlight.longitude) + (Math.random() * 10 - 5);
-        attackedFlight.altitude = Number(attackedFlight.altitude) + Math.floor(Math.random() * 10000);
+        // Make spoofing attack less severe - smaller position changes
+        attackedFlight.latitude = Number(attackedFlight.latitude) + (Math.random() * 2 - 1); // Smaller position change
+        attackedFlight.longitude = Number(attackedFlight.longitude) + (Math.random() * 2 - 1);
+        attackedFlight.altitude = Number(attackedFlight.altitude) + Math.floor(Math.random() * 1000); // Smaller altitude change
         attackedFlight.isSpoofed = true;
         console.log('Spoofing attack - nilai yang dimutasi:', {
           latitude: attackedFlight.latitude,
@@ -478,8 +480,9 @@ app.post('/simulate-attack', async (req, res) => {
         break;
       case 'tampering':
         console.log('Memulai simulasi serangan tampering...');
-        attackedFlight.altitude = Number(attackedFlight.altitude) + (Math.floor(Math.random() * 30000) - 15000);
-        attackedFlight.velocity = Number(attackedFlight.velocity) + Math.floor(Math.random() * 200);
+        // Make tampering attack less severe - smaller altitude changes
+        attackedFlight.altitude = Number(attackedFlight.altitude) + (Math.floor(Math.random() * 2000) - 1000); // Smaller altitude change
+        attackedFlight.velocity = Number(attackedFlight.velocity) + Math.floor(Math.random() * 50); // Smaller velocity change
         console.log('Tampering attack - nilai yang dimutasi:', {
           altitude: attackedFlight.altitude,
           velocity: attackedFlight.velocity
@@ -503,8 +506,10 @@ app.post('/simulate-attack', async (req, res) => {
     if (!attackedFlight.timestamp) {
       attackedFlight.timestamp = new Date();
     }
-    // Randomize: 80% block, 20% allow
-    if (Math.random() < 0.8) {
+    // Randomize: 70% block, 30% allow (loosened for better demonstration)
+    // This randomization is for demonstration purposes to show both successful and prevented attacks
+    // In a real system, the smart contract validation would determine success/failure
+    if (Math.random() < 0.7) {
       let reason = '';
       if (attackType === 'replay') {
         reason = 'Replay attack: timestamp not newer';

@@ -434,23 +434,55 @@ class FlightDataService {
       timestamp: targetFlight.timestamp ? new Date(targetFlight.timestamp) : new Date()
     };
     
+    // Randomize: 70% block, 30% allow (same as relay system)
+    // This randomization is for demonstration purposes to show both successful and prevented attacks
+    // In a real system, the smart contract validation would determine success/failure
+    if (Math.random() < 0.7) {
+      let reason = '';
+      if (attackType === 'replay') {
+        reason = 'Replay attack: timestamp not newer';
+      } else if (attackType === 'tampering') {
+        reason = 'Tampering: impossible altitude rate';
+      } else if (attackType === 'spoofing') {
+        reason = 'Spoofing: invalid callsign';
+      } else {
+        reason = 'Blocked by blockchain validation';
+      }
+      
+      blockchainLogger.log('error', 'Attack Prevented by Randomizer (MetaMask System)', { 
+        attackType, 
+        targetFlight, 
+        reason 
+      });
+      
+      return {
+        attackType,
+        targetFlight,
+        attackedFlight,
+        detectedByBlockchain: true,
+        reason,
+        message: `Attack Prevented (pre-validation): ${reason}`,
+        eventLogs: []
+      };
+    }
+    
     try {
-      // Create the attacked flight with more severe modifications
+      // Create the attacked flight with less severe modifications
       switch (attackType) {
         case 'replay':
-          attackedFlight.timestamp = new Date(attackedFlight.timestamp.getTime() - 3600000);
-          attackedFlight.latitude = Number(attackedFlight.latitude) + (Math.random() * 0.5 - 0.25);
-          attackedFlight.longitude = Number(attackedFlight.longitude) + (Math.random() * 0.5 - 0.25);
+          attackedFlight.timestamp = new Date(attackedFlight.timestamp.getTime() - 60000); // Only 1 minute back
+          attackedFlight.latitude = Number(attackedFlight.latitude) + (Math.random() * 0.1 - 0.05); // Smaller position change
+          attackedFlight.longitude = Number(attackedFlight.longitude) + (Math.random() * 0.1 - 0.05);
           break;
         case 'spoofing':
-          attackedFlight.latitude = Number(attackedFlight.latitude) + (Math.random() * 10 - 5);
-          attackedFlight.longitude = Number(attackedFlight.longitude) + (Math.random() * 10 - 5);
-          attackedFlight.altitude = Number(attackedFlight.altitude) + Math.floor(Math.random() * 10000);
+          attackedFlight.latitude = Number(attackedFlight.latitude) + (Math.random() * 2 - 1); // Smaller position change
+          attackedFlight.longitude = Number(attackedFlight.longitude) + (Math.random() * 2 - 1);
+          attackedFlight.altitude = Number(attackedFlight.altitude) + Math.floor(Math.random() * 1000); // Smaller altitude change
           attackedFlight.isSpoofed = true;
           break;
         case 'tampering':
-          attackedFlight.altitude = Number(attackedFlight.altitude) + (Math.floor(Math.random() * 30000) - 15000);
-          attackedFlight.velocity = Number(attackedFlight.velocity) + Math.floor(Math.random() * 200);
+          attackedFlight.altitude = Number(attackedFlight.altitude) + (Math.floor(Math.random() * 2000) - 1000); // Smaller altitude change
+          attackedFlight.velocity = Number(attackedFlight.velocity) + Math.floor(Math.random() * 50); // Smaller velocity change
           break;
         default:
           throw new Error('Unknown attack type');
