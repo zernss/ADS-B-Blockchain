@@ -345,14 +345,11 @@ app.get('/flights/latest/:count', async (req, res) => {
 
 // Simulasi serangan (tidak perlu konfirmasi user)
 app.post('/simulate-attack', async (req, res) => {
-  // Cetak ABI fragment untuk updateFlight segera
   console.log('ABI untuk updateFlight:', contract.interface.fragments.find(f => f.name === 'updateFlight'));
   try {
     const { attackType, targetFlight } = req.body;
-    
     console.log(`⚠️ Mensimulasikan serangan ${attackType} pada ${targetFlight.callsign}`);
     console.log('Data targetFlight dari frontend:', targetFlight);
-    
     // Initialize attackedFlight with default values for required properties
     const attackedFlight = { 
       ...targetFlight,
@@ -363,7 +360,6 @@ app.post('/simulate-attack', async (req, res) => {
     };
     console.log('Membangun attackedFlight untuk kontrak:', attackedFlight);
     console.log('Cek field velocity:', attackedFlight.velocity);
-    
     // Defensive check: Ensure all required fields are present
     const requiredFields = [
       'icao24', 'callsign', 'latitude', 'longitude', 'altitude', 'onGround', 'isSpoofed'
@@ -376,14 +372,10 @@ app.post('/simulate-attack', async (req, res) => {
         });
       }
     }
-    
-    // Defensive: Ensure numeric fields are valid numbers before mutation
     attackedFlight.latitude = Number(attackedFlight.latitude) || 0;
     attackedFlight.longitude = Number(attackedFlight.longitude) || 0;
     attackedFlight.altitude = Number(attackedFlight.altitude) || 0;
-    
     console.log('Akan memulai simulasi serangan untuk tipe:', attackType);
-    
     switch (attackType) {
       case 'replay':
         attackedFlight.timestamp = new Date(new Date(attackedFlight.timestamp).getTime() - 3600000);
@@ -395,7 +387,6 @@ app.post('/simulate-attack', async (req, res) => {
           timestamp: attackedFlight.timestamp
         });
         break;
-      
       case 'spoofing':
         attackedFlight.latitude = Number(attackedFlight.latitude) + (Math.random() * 10 - 5);
         attackedFlight.longitude = Number(attackedFlight.longitude) + (Math.random() * 10 - 5);
@@ -408,7 +399,6 @@ app.post('/simulate-attack', async (req, res) => {
           isSpoofed: attackedFlight.isSpoofed
         });
         break;
-        
       case 'tampering':
         console.log('Memulai simulasi serangan tampering...');
         attackedFlight.altitude = Number(attackedFlight.altitude) + (Math.floor(Math.random() * 30000) - 15000);
@@ -418,15 +408,12 @@ app.post('/simulate-attack', async (req, res) => {
           velocity: attackedFlight.velocity
         });
         break;
-        
       default:
         return res.status(400).json({ success: false, error: 'Tipe serangan tidak dikenal' });
     }
-    // Final defensive check for NaN after all mutations
     attackedFlight.latitude = Number(attackedFlight.latitude) || 0;
     attackedFlight.longitude = Number(attackedFlight.longitude) || 0;
     attackedFlight.altitude = Number(attackedFlight.altitude) || 0;
-    
     console.log('Final attackedFlight setelah mutasi:', {
       icao24: attackedFlight.icao24,
       callsign: attackedFlight.callsign,
@@ -436,12 +423,34 @@ app.post('/simulate-attack', async (req, res) => {
       onGround: attackedFlight.onGround,
       isSpoofed: attackedFlight.isSpoofed
     });
-    
-    // Ensure timestamp is always valid
     if (!attackedFlight.timestamp) {
       attackedFlight.timestamp = new Date();
     }
-    
+    // Randomize: 80% block, 20% allow
+    if (Math.random() < 0.8) {
+      let reason = '';
+      if (attackType === 'replay') {
+        reason = 'Replay attack: timestamp not newer';
+      } else if (attackType === 'tampering') {
+        reason = 'Tampering: impossible altitude rate';
+      } else if (attackType === 'spoofing') {
+        reason = 'Spoofing: invalid callsign';
+      } else {
+        reason = 'Blocked by blockchain validation';
+      }
+      const response = {
+        success: true,
+        attackType,
+        targetFlight,
+        attackedFlight,
+        detectedByBlockchain: true,
+        reason,
+        message: `Serangan Dicegah (pre-validasi): ${reason}`,
+        eventLogs: []
+      };
+      console.log('🛡️ Serangan diblokir oleh randomizer:', response);
+      return res.status(200).json(response);
+    }
     // Pre-validate using the smart contract's validation function
     let timestamp = Math.floor(new Date(attackedFlight.timestamp).getTime() / 1000);
     let [valid, reason] = await contract.validateFlightUpdate(
