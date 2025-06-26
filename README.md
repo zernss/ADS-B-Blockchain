@@ -1,20 +1,76 @@
 # ADS-B Blockchain Security System
 
-A comprehensive demonstration of blockchain-based security for ADS-B flight data, featuring **two different implementation approaches** for comparison.
+## What is This Project?
 
-## 🚀 Quick Start
+This project is a demonstration of how **blockchain technology** can be used to make flight data more secure. It is designed so that even people without a technical background can understand the benefits and see how it works in action.
 
-### Option 1: Complete System (Recommended)
+### What is ADS-B?
+- **ADS-B** stands for **Automatic Dependent Surveillance–Broadcast**.
+- It is a system used by airplanes to broadcast their position, speed, and other flight data so that air traffic controllers and other planes can know where they are.
+- This data is public and can be received by anyone with the right equipment.
+
+### Why is Security Important?
+- Because ADS-B data is not encrypted, it is possible for attackers to send false data ("spoofing"), replay old data, or tamper with real data.
+- This can cause confusion or even danger in air traffic management.
+
+### How Does Blockchain Help?
+- **Blockchain** is a technology that stores data in a way that is very hard to change or fake.
+- By putting flight data on a blockchain, we can make sure that once data is recorded, it cannot be changed or deleted.
+- This helps prevent attacks and makes it easy to check if the data is real.
+
+### What is a Smart Contract?
+- A **smart contract** is a special computer program that runs on the blockchain.
+- It automatically follows rules that cannot be changed once the contract is deployed.
+- In this project, the smart contract is responsible for:
+  - Storing flight data securely on the blockchain
+  - Making sure data cannot be changed or deleted after being recorded
+  - Checking for suspicious or invalid flight data (such as impossible altitude changes)
+  - Rejecting any data that does not follow the rules
+- This means the smart contract acts like a digital security guard, making sure all flight data is safe, real, and trustworthy.
+
+## What Does This Project Do?
+
+This project shows two main ways to secure ADS-B flight data using blockchain:
+
+1. **Relay System** (Seamless, No User Action Needed)
+   - The system automatically sends flight data to the blockchain using a server.
+   - Users do not need to do anything or confirm transactions.
+   - This is fast and easy for demonstrations or real-world use.
+
+2. **MetaMask System** (User-Controlled, Educational)
+   - Users must confirm every transaction using MetaMask (a popular crypto wallet browser extension).
+   - This gives users full control and helps them learn how blockchain works.
+   - Best for teaching and showing how blockchain security works in detail.
+
+There is also an **Unprotected System** for comparison, which does not use blockchain and is vulnerable to attacks.
+
+## What Can You Do With This Project?
+- **See real flight data** from the OpenSky Network.
+- **Store flight data on the blockchain** and see how it cannot be changed.
+- **Simulate attacks** (replay, spoofing, tampering) and see how the blockchain prevents or detects them.
+- **Compare** a secure system (blockchain) with an insecure one (traditional).
+
+## How Does It Work?
+- The system fetches real flight data from the internet.
+- It stores this data on a blockchain using a smart contract.
+- You can view the data, simulate attacks, and see the results in a web interface.
+- You can choose between a seamless experience (Relay System) or a user-controlled one (MetaMask System).
+
+## How to Use This Project
+
+### 🚀 Quick Start
+
+#### Option 1: Complete System (Recommended)
 ```bash
 node start-complete-system.js
 ```
 This starts everything automatically:
-- Hardhat blockchain node
+- Blockchain node
 - Smart contract deployment
-- Transaction relay server
+- Relay server
 - Web interface
 
-### Option 2: Manual Setup
+#### Option 2: Manual Setup
 ```bash
 # 1. Start blockchain
 npx hardhat node
@@ -31,22 +87,52 @@ cd web-interface && npm start
 
 ## 🌐 Available Systems
 
-### 1. Relay System (`/relay-blockchain`) - **Seamless Experience**
-- **No MetaMask required**
-- **No user confirmations**
-- **Instant transactions**
-- **Perfect for demonstrations**
+### 1. Relay System (`/relay-blockchain`)
+- No MetaMask required
+- No user confirmations
+- Instant transactions
+- Great for demos and real-world use
 
-### 2. MetaMask System (`/blockchain`) - **Full Control**
-- **Requires MetaMask setup**
-- **User confirms each transaction**
-- **Educational experience**
-- **Full transparency**
+### 2. MetaMask System (`/blockchain`)
+- Requires MetaMask browser extension
+- User confirms each transaction
+- Great for learning and transparency
 
-### 3. Unprotected System (`/unprotected`) - **Comparison**
-- **Traditional system**
-- **No blockchain security**
-- **For comparison purposes**
+### 3. Unprotected System (`/unprotected`)
+- No blockchain security
+- For comparison only
+
+## 📋 Features
+- Real-time flight data
+- Blockchain-secured storage
+- Simulate attacks and see how blockchain protects data
+- Compare secure and insecure systems
+
+## 🔧 How It's Built
+- **Smart Contract**: Stores flight data on the blockchain
+- **Relay Server**: Handles transactions for the seamless system
+- **Web Interface**: Lets you view data, simulate attacks, and compare systems
+
+## 📖 Documentation
+- [Setup Guide](SETUP_GUIDE.md) - Step-by-step instructions
+- [System Comparison](SYSTEM_COMPARISON.md) - Compare all systems
+- [MetaMask Setup](setup-metamask.js) - How to set up MetaMask
+
+## 🛠️ Project Structure
+```
+ADS-B-Blockchain/
+├── contracts/           # Smart contracts
+├── server/             # Relay server
+├── web-interface/      # Web interface
+├── scripts/            # Deployment scripts
+└── test/               # Test files
+```
+
+## 🚨 Troubleshooting
+- If you have issues, see the troubleshooting section below for common problems and solutions.
+
+## 🎉 Success!
+You can now see how blockchain can protect flight data, simulate attacks, and compare different security approaches—all in one easy-to-use demo!
 
 ## 📋 System Features
 
@@ -109,30 +195,6 @@ each transaction  transaction  executes     validates
 - Demonstrating user control
 - Educational environments
 - Security-focused demonstrations
-
-## 📖 Documentation
-
-- [Setup Guide](SETUP_GUIDE.md) - Detailed setup instructions
-- [System Comparison](SYSTEM_COMPARISON.md) - Comprehensive comparison
-- [MetaMask Setup](setup-metamask.js) - Quick MetaMask configuration
-
-## 🛠️ Development
-
-### Project Structure
-```
-ADS-B-Blockchain/
-├── contracts/           # Smart contracts
-├── server/             # Transaction relay server
-├── web-interface/      # React frontend
-├── scripts/            # Deployment scripts
-└── test/              # Test files
-```
-
-### Key Components
-- **Smart Contract**: `contracts/AdsbData.sol`
-- **Relay Server**: `server/transaction-relay.js`
-- **MetaMask System**: `web-interface/src/components/BlockchainPage.js`
-- **Relay System**: `web-interface/src/components/RelayBlockchainPage.js`
 
 ## 🔍 Testing
 

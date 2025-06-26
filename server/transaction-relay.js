@@ -11,13 +11,13 @@ const PORT = 3001;
 app.use(cors());
 app.use(express.json());
 
-// Root endpoint for basic server status
+// Endpoint root untuk status server dasar
 app.get('/', (req, res) => {
   res.json({
-    message: 'ADS-B Transaction Relay Server is running.',
-    status: 'healthy',
-    documentation: 'See SYSTEM_COMPARISON.md for more details.',
-    healthCheck: 'GET /health for detailed status.'
+    message: 'Server Relay Transaksi ADS-B sedang berjalan.',
+    status: 'sehat',
+    documentation: 'Lihat SYSTEM_COMPARISON.md untuk detail lebih lanjut.',
+    healthCheck: 'GET /health untuk status detail.'
   });
 });
 
@@ -34,15 +34,15 @@ const privateKey = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4
 const wallet = new ethers.Wallet(privateKey, provider);
 const contract = new ethers.Contract(config.contractAddress, contractABI.abi, wallet);
 
-console.log("🔧 Transaction Relay Server Starting...");
-console.log("📋 Contract Address:", config.contractAddress);
-console.log("👤 Sender Address:", wallet.address);
-console.log("🌐 Network:", config.networkId);
+console.log("🔧 Server Relay Transaksi Dimulai...");
+console.log("📋 Alamat Kontrak:", config.contractAddress);
+console.log("👤 Alamat Pengirim:", wallet.address);
+console.log("🌐 Jaringan:", config.networkId);
 
-// Health check endpoint
+// Endpoint pengecekan kesehatan
 app.get('/health', (req, res) => {
   res.json({
-    status: 'healthy',
+    status: 'sehat',
     contractAddress: config.contractAddress,
     senderAddress: wallet.address,
     networkId: config.networkId
@@ -55,17 +55,17 @@ app.get('/flight-count', async (req, res) => {
     const count = await contract.getFlightCount();
     res.json({ count: count.toString() });
   } catch (error) {
-    console.error('Error getting flight count:', error);
+    console.error('Kesalahan saat mendapatkan jumlah penerbangan:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Add single flight data (no user confirmation needed)
+// Tambah data penerbangan tunggal (tidak perlu konfirmasi user)
 app.post('/add-flight', async (req, res) => {
   try {
     const { icao24, callsign, latitude, longitude, altitude, onGround, isSpoofed } = req.body;
     
-    console.log(`✈️ Adding flight: ${callsign} (${icao24})`);
+    console.log(`✈️ Menambahkan penerbangan: ${callsign} (${icao24})`);
     
     // Fetch the latest nonce
     const nonce = await provider.getTransactionCount(wallet.address, 'latest');
@@ -83,10 +83,10 @@ app.post('/add-flight', async (req, res) => {
     
     const receipt = await tx.wait();
     
-    console.log(`✅ Flight added successfully!`);
-    console.log(`   Transaction: ${tx.hash}`);
-    console.log(`   Block: ${receipt.blockNumber}`);
-    console.log(`   Gas used: ${receipt.gasUsed.toString()}`);
+    console.log(`✅ Penerbangan berhasil ditambahkan!`);
+    console.log(`   Transaksi: ${tx.hash}`);
+    console.log(`   Blok: ${receipt.blockNumber}`);
+    console.log(`   Gas digunakan: ${receipt.gasUsed.toString()}`);
     
     res.json({
       success: true,
@@ -97,7 +97,7 @@ app.post('/add-flight', async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Error adding flight:', error);
+    console.error('Kesalahan saat menambah penerbangan:', error);
     res.status(500).json({ 
       success: false,
       error: error.message 
@@ -105,7 +105,7 @@ app.post('/add-flight', async (req, res) => {
   }
 });
 
-// Add multiple flights in batch (no user confirmation needed)
+// Tambah beberapa penerbangan sekaligus (batch, tidak perlu konfirmasi user)
 app.post('/add-flights-batch', async (req, res) => {
   try {
     const { flights } = req.body;
@@ -113,21 +113,21 @@ app.post('/add-flights-batch', async (req, res) => {
     if (!Array.isArray(flights) || flights.length === 0) {
       return res.status(400).json({ 
         success: false,
-        error: 'Flights array is required and must not be empty' 
+        error: 'Array penerbangan wajib diisi dan tidak boleh kosong' 
       });
     }
     
-    // Add batch size validation
+    // Validasi ukuran batch
     if (flights.length > 50) {
       return res.status(400).json({
         success: false,
-        error: 'Batch size too large (max 50 flights)'
+        error: 'Ukuran batch terlalu besar (maksimal 50 penerbangan)'
       });
     }
     
-    console.log(`📦 Adding ${flights.length} flights in batch...`);
+    console.log(`📦 Menambahkan ${flights.length} penerbangan secara batch...`);
     
-    // Validate each flight before processing
+    // Validasi setiap penerbangan sebelum diproses
     const validFlights = [];
     const invalidFlights = [];
     
@@ -139,19 +139,19 @@ app.post('/add-flights-batch', async (req, res) => {
         validFlights.push(flight);
       } else {
         invalidFlights.push(flight);
-        console.warn('Invalid flight data:', flight);
+        console.warn('Data penerbangan tidak valid:', flight);
       }
     }
     
     if (validFlights.length === 0) {
       return res.status(400).json({
         success: false,
-        error: 'No valid flights found in batch'
+        error: 'Tidak ada penerbangan valid dalam batch'
       });
     }
     
     if (invalidFlights.length > 0) {
-      console.log(`⚠️ Filtered out ${invalidFlights.length} invalid flights`);
+      console.log(`⚠️ ${invalidFlights.length} data penerbangan tidak valid telah difilter`);
     }
     
     // Log the batch to be sent
@@ -162,7 +162,7 @@ app.post('/add-flights-batch', async (req, res) => {
     const altitudes = validFlights.map(f => Math.floor(f.altitude));
     const onGrounds = validFlights.map(f => f.onGround || false);
     const isSpoofedFlags = validFlights.map(f => f.isSpoofed || false);
-    console.log('Batch to be sent:', {
+    console.log('Batch yang akan dikirim:', {
       icao24s,
       callsigns,
       latitudes,
@@ -183,7 +183,7 @@ app.post('/add-flights-batch', async (req, res) => {
         const onGrounds = batch.map(f => f.onGround || false);
         const isSpoofedFlags = batch.map(f => f.isSpoofed || false);
         const nonce = await provider.getTransactionCount(wallet.address, 'latest');
-        console.log(`🚀 Sending batch of ${batch.length} flights with gasLimit ${batchGasLimit}`);
+        console.log(`🚀 Mengirim batch sebanyak ${batch.length} penerbangan dengan gasLimit ${batchGasLimit}`);
         const tx = await contract.updateFlightBatch(
           icao24s,
           callsigns,
@@ -195,10 +195,10 @@ app.post('/add-flights-batch', async (req, res) => {
           { nonce, gasLimit: batchGasLimit }
         );
         const receipt = await tx.wait();
-        console.log(`✅ Batch transaction successful! Hash: ${tx.hash}`);
+        console.log(`✅ Transaksi batch berhasil! Hash: ${tx.hash}`);
         return { success: true, tx, receipt, batch };
       } catch (error) {
-        console.error('❌ Batch failed:', error.message);
+        console.error('❌ Batch gagal:', error.message);
         return { success: false, error, batch };
       }
     }
@@ -219,15 +219,15 @@ app.post('/add-flights-batch', async (req, res) => {
         if (result.success) {
           allResults.push(result);
         } else {
-          // If batch fails and is larger than minBatchSize, split and retry
+          // Jika batch gagal dan lebih besar dari minBatchSize, split dan coba lagi
           if (batch.length > minBatchSize) {
             const mid = Math.floor(batch.length / 2);
             nextBatches.push(batch.slice(0, mid));
             nextBatches.push(batch.slice(mid));
-            console.log(`🔄 Splitting batch of ${batch.length} into ${batch.slice(0, mid).length} and ${batch.slice(mid).length}`);
+            console.log(`🔄 Membagi batch ${batch.length} menjadi ${batch.slice(0, mid).length} dan ${batch.slice(mid).length}`);
           } else {
-            // If single flight fails, log and skip
-            console.warn('⚠️ Skipping flight due to repeated failure:', batch[0]);
+            // Jika satu penerbangan gagal, log dan lewati
+            console.warn('⚠️ Melewati penerbangan karena gagal berulang:', batch[0]);
             allResults.push({ success: false, error: result.error, batch });
           }
         }
@@ -236,10 +236,10 @@ app.post('/add-flights-batch', async (req, res) => {
       retryCount++;
     }
 
-    // Summarize results
+    // Ringkasan hasil
     const successfulBatches = allResults.filter(r => r.success);
     const failedBatches = allResults.filter(r => !r.success);
-    console.log(`✅ Successful batches: ${successfulBatches.length}, ❌ Failed batches: ${failedBatches.length}`);
+    console.log(`✅ Batch berhasil: ${successfulBatches.length}, ❌ Batch gagal: ${failedBatches.length}`);
     
     if (successfulBatches.length === 0) {
       return res.status(500).json({
@@ -264,7 +264,7 @@ app.post('/add-flights-batch', async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Error adding flights batch:', error);
+    console.error('Kesalahan saat menambah batch penerbangan:', error);
     
     // Provide more detailed error information
     let errorMessage = error.message;
@@ -306,7 +306,7 @@ app.get('/flights', async (req, res) => {
     res.json({ flights, count: flights.length });
     
   } catch (error) {
-    console.error('Error getting flights:', error);
+    console.error('Kesalahan saat mendapatkan data penerbangan:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -338,20 +338,20 @@ app.get('/flights/latest/:count', async (req, res) => {
     res.json({ flights, count: flights.length });
     
   } catch (error) {
-    console.error('Error getting latest flights:', error);
+    console.error('Kesalahan saat mendapatkan penerbangan terbaru:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Simulate attack (no user confirmation needed)
+// Simulasi serangan (tidak perlu konfirmasi user)
 app.post('/simulate-attack', async (req, res) => {
-  // Print ABI fragment for updateFlight immediately
-  console.log('ABI for updateFlight:', contract.interface.fragments.find(f => f.name === 'updateFlight'));
+  // Cetak ABI fragment untuk updateFlight segera
+  console.log('ABI untuk updateFlight:', contract.interface.fragments.find(f => f.name === 'updateFlight'));
   try {
     const { attackType, targetFlight } = req.body;
     
-    console.log(`⚠️ Simulating ${attackType} attack on ${targetFlight.callsign}`);
-    console.log('Received targetFlight from frontend:', targetFlight);
+    console.log(`⚠️ Mensimulasikan serangan ${attackType} pada ${targetFlight.callsign}`);
+    console.log('Data targetFlight dari frontend:', targetFlight);
     
     // Initialize attackedFlight with default values for required properties
     const attackedFlight = { 
@@ -361,8 +361,8 @@ app.post('/simulate-attack', async (req, res) => {
       velocity: Number(targetFlight.velocity) || 0,
       timestamp: targetFlight.timestamp ? new Date(targetFlight.timestamp) : new Date()
     };
-    console.log('Constructed attackedFlight for contract:', attackedFlight);
-    console.log('Velocity field check:', attackedFlight.velocity);
+    console.log('Membangun attackedFlight untuk kontrak:', attackedFlight);
+    console.log('Cek field velocity:', attackedFlight.velocity);
     
     // Defensive check: Ensure all required fields are present
     const requiredFields = [
@@ -382,14 +382,14 @@ app.post('/simulate-attack', async (req, res) => {
     attackedFlight.longitude = Number(attackedFlight.longitude) || 0;
     attackedFlight.altitude = Number(attackedFlight.altitude) || 0;
     
-    console.log('About to start attack simulation for type:', attackType);
+    console.log('Akan memulai simulasi serangan untuk tipe:', attackType);
     
     switch (attackType) {
       case 'replay':
         attackedFlight.timestamp = new Date(new Date(attackedFlight.timestamp).getTime() - 3600000);
         attackedFlight.latitude = Number(attackedFlight.latitude) + (Math.random() * 0.5 - 0.25);
         attackedFlight.longitude = Number(attackedFlight.longitude) + (Math.random() * 0.5 - 0.25);
-        console.log('Replay attack - mutated values:', {
+        console.log('Replay attack - nilai yang dimutasi:', {
           latitude: attackedFlight.latitude,
           longitude: attackedFlight.longitude,
           timestamp: attackedFlight.timestamp
@@ -401,7 +401,7 @@ app.post('/simulate-attack', async (req, res) => {
         attackedFlight.longitude = Number(attackedFlight.longitude) + (Math.random() * 10 - 5);
         attackedFlight.altitude = Number(attackedFlight.altitude) + Math.floor(Math.random() * 10000);
         attackedFlight.isSpoofed = true;
-        console.log('Spoofing attack - mutated values:', {
+        console.log('Spoofing attack - nilai yang dimutasi:', {
           latitude: attackedFlight.latitude,
           longitude: attackedFlight.longitude,
           altitude: attackedFlight.altitude,
@@ -410,24 +410,24 @@ app.post('/simulate-attack', async (req, res) => {
         break;
         
       case 'tampering':
-        console.log('Starting tampering attack simulation...');
+        console.log('Memulai simulasi serangan tampering...');
         attackedFlight.altitude = Number(attackedFlight.altitude) + (Math.floor(Math.random() * 30000) - 15000);
         attackedFlight.velocity = Number(attackedFlight.velocity) + Math.floor(Math.random() * 200);
-        console.log('Tampering attack - mutated values:', {
+        console.log('Tampering attack - nilai yang dimutasi:', {
           altitude: attackedFlight.altitude,
           velocity: attackedFlight.velocity
         });
         break;
         
       default:
-        return res.status(400).json({ success: false, error: 'Unknown attack type' });
+        return res.status(400).json({ success: false, error: 'Tipe serangan tidak dikenal' });
     }
     // Final defensive check for NaN after all mutations
     attackedFlight.latitude = Number(attackedFlight.latitude) || 0;
     attackedFlight.longitude = Number(attackedFlight.longitude) || 0;
     attackedFlight.altitude = Number(attackedFlight.altitude) || 0;
     
-    console.log('Final attackedFlight after mutations:', {
+    console.log('Final attackedFlight setelah mutasi:', {
       icao24: attackedFlight.icao24,
       callsign: attackedFlight.callsign,
       latitude: attackedFlight.latitude,
@@ -459,10 +459,10 @@ app.post('/simulate-attack', async (req, res) => {
         attackedFlight,
         detectedByBlockchain: true,
         reason,
-        message: `Attack Prevented (pre-validation): ${reason}`,
+        message: `Serangan Dicegah (pre-validasi): ${reason}`,
         eventLogs: []
       };
-      console.log('🛡️ Attack blocked by pre-validation:', response);
+      console.log('🛡️ Serangan diblokir oleh pre-validasi:', response);
       return res.status(200).json(response);
     }
     
@@ -477,9 +477,9 @@ app.post('/simulate-attack', async (req, res) => {
         attackedFlight.onGround,
         attackedFlight.isSpoofed
       ];
-      console.log('updateFlight args:', updateFlightArgs);
-      console.log('updateFlight arg types:', updateFlightArgs.map(x => typeof x));
-      console.log('updateFlight arg values (detailed):', {
+      console.log('Argumen updateFlight:', updateFlightArgs);
+      console.log('Tipe argumen updateFlight:', updateFlightArgs.map(x => typeof x));
+      console.log('Nilai argumen updateFlight (detail):', {
         icao24: updateFlightArgs[0],
         callsign: updateFlightArgs[1],
         latitude: updateFlightArgs[2],
@@ -491,10 +491,10 @@ app.post('/simulate-attack', async (req, res) => {
       // Defensive check for NaN or undefined
       for (let i = 0; i < updateFlightArgs.length; i++) {
         if (updateFlightArgs[i] === undefined || updateFlightArgs[i] === null || (typeof updateFlightArgs[i] === 'number' && isNaN(updateFlightArgs[i]))) {
-          console.error(`Invalid argument at position ${i}:`, updateFlightArgs[i]);
+          console.error(`Argumen tidak valid di posisi ${i}:`, updateFlightArgs[i]);
           return res.status(400).json({
             success: false,
-            error: `Invalid argument at position ${i}: ${updateFlightArgs[i]}`
+            error: `Argumen tidak valid di posisi ${i}: ${updateFlightArgs[i]}`
           });
         }
       }
@@ -539,7 +539,7 @@ app.post('/simulate-attack', async (req, res) => {
         message: "Attack Succeeded: The malicious data was accepted by the blockchain.",
         eventLogs
       };
-      console.log('✅ Attack accepted by blockchain:', response);
+      console.log('✅ Serangan diterima oleh blockchain:', response);
       res.status(200).json(response);
 
     } catch (error) {
@@ -568,12 +568,12 @@ app.post('/simulate-attack', async (req, res) => {
         message: "Attack Prevented: The smart contract rejected the malicious transaction.",
         eventLogs
       };
-      console.log('🛡️ Attack blocked by blockchain:', response);
+      console.log('🛡️ Serangan diblokir oleh blockchain:', response);
       res.status(200).json(response);
     }
     
   } catch (error) {
-    console.error('Error in /simulate-attack endpoint:', error);
+    console.error('Kesalahan di endpoint /simulate-attack:', error);
     res.status(500).json({ 
       success: false,
       error: error.message 
@@ -583,9 +583,9 @@ app.post('/simulate-attack', async (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Transaction Relay Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server Relay Transaksi berjalan di http://localhost:${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/health`);
-  console.log(`✈️ Ready to handle flight data transactions without user confirmations!`);
+  console.log(`✈️ Siap menangani transaksi data penerbangan tanpa konfirmasi user!`);
 });
 
 module.exports = app; 

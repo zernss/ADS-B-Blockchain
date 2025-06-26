@@ -1,5 +1,5 @@
 import blockchainLogger from "./BlockchainLogger";
-import config from '../config.json';
+// import config from '../config.json'; // Dihapus karena tidak digunakan
 
 const RELAY_SERVER_URL = 'http://localhost:3001';
 
@@ -24,12 +24,12 @@ class RelayBlockchainSystem {
 
   async addFlightData(flight) {
     if (!this.isConnected) {
-      blockchainLogger.log('error', 'Cannot add flight data: Relay server not connected');
+      blockchainLogger.log('error', 'Tidak dapat menambah data penerbangan: Server relay tidak terhubung');
       return false;
     }
     
     try {
-      blockchainLogger.log('info', 'Adding flight data via relay server', {
+      blockchainLogger.log('info', 'Menambah data penerbangan melalui server relay', {
         icao24: flight.icao24,
         callsign: flight.callsign,
         latitude: flight.latitude,
@@ -56,7 +56,7 @@ class RelayBlockchainSystem {
       const result = await response.json();
       
       if (result.success) {
-        blockchainLogger.log('success', 'Flight data added via relay server', {
+        blockchainLogger.log('success', 'Data penerbangan berhasil ditambah melalui server relay', {
           transactionHash: result.transactionHash,
           blockNumber: result.blockNumber,
           gasUsed: result.gasUsed,
@@ -64,14 +64,14 @@ class RelayBlockchainSystem {
         });
         return true;
       } else {
-        blockchainLogger.log('error', 'Failed to add flight data via relay server', {
+        blockchainLogger.log('error', 'Gagal menambah data penerbangan melalui server relay', {
           icao24: flight.icao24,
           error: result.error
         });
         return false;
       }
     } catch (error) {
-      blockchainLogger.log('error', 'Relay server request failed', {
+      blockchainLogger.log('error', 'Permintaan server relay gagal', {
         icao24: flight.icao24,
         error: error.message
       });
@@ -81,14 +81,14 @@ class RelayBlockchainSystem {
 
   async addFlightDataBatch(flights) {
     if (!this.isConnected) {
-      blockchainLogger.log('error', 'Cannot add flight data batch: Relay server not connected');
+      blockchainLogger.log('error', 'Tidak dapat menambah batch data penerbangan: Server relay tidak terhubung');
       return false;
     }
     
-    // Add batch size limit and chunking
+    // Tambahkan batas ukuran batch dan chunking
     const MAX_BATCH_SIZE = 50;
     if (flights.length > MAX_BATCH_SIZE) {
-      blockchainLogger.log('warning', 'Batch size too large, splitting into chunks', {
+      blockchainLogger.log('warning', 'Ukuran batch terlalu besar, membagi menjadi beberapa bagian', {
         totalFlights: flights.length,
         maxBatchSize: MAX_BATCH_SIZE
       });
@@ -103,7 +103,7 @@ class RelayBlockchainSystem {
     }
     
     try {
-      blockchainLogger.log('info', 'Adding flight data batch via relay server', {
+      blockchainLogger.log('info', 'Menambah batch data penerbangan melalui server relay', {
         count: flights.length,
         icao24s: flights.map(f => f.icao24)
       });
@@ -119,7 +119,7 @@ class RelayBlockchainSystem {
       const result = await response.json();
       
       if (result.success) {
-        blockchainLogger.log('success', 'Flight data batch added via relay server', {
+        blockchainLogger.log('success', 'Batch data penerbangan berhasil ditambah melalui server relay', {
           transactionHash: result.transactionHash,
           blockNumber: result.blockNumber,
           gasUsed: result.gasUsed,
@@ -127,14 +127,14 @@ class RelayBlockchainSystem {
         });
         return true;
       } else {
-        blockchainLogger.log('error', 'Failed to add flight data batch via relay server', {
+        blockchainLogger.log('error', 'Gagal menambah batch data penerbangan melalui server relay', {
           count: flights.length,
           error: result.error
         });
         return false;
       }
     } catch (error) {
-      blockchainLogger.log('error', 'Relay server batch request failed', {
+      blockchainLogger.log('error', 'Permintaan batch server relay gagal', {
         count: flights.length,
         error: error.message
       });
@@ -144,7 +144,7 @@ class RelayBlockchainSystem {
 
   async verifyFlightData(icao24) {
     if (!this.isConnected) {
-      blockchainLogger.log('error', 'Cannot verify flight data: Relay server not connected');
+      blockchainLogger.log('error', 'Tidak dapat memverifikasi data penerbangan: Server relay tidak terhubung');
       return false;
     }
     
@@ -155,18 +155,18 @@ class RelayBlockchainSystem {
       const flight = data.flights.find(f => f.icao24 === icao24);
       
       if (flight) {
-        blockchainLogger.log('success', 'Flight data verified via relay server', {
+        blockchainLogger.log('success', 'Data penerbangan berhasil diverifikasi melalui server relay', {
           icao24,
           callsign: flight.callsign,
           timestamp: flight.timestamp
         });
         return true;
       } else {
-        blockchainLogger.log('warning', 'Flight data not found via relay server', { icao24 });
+        blockchainLogger.log('warning', 'Data penerbangan tidak ditemukan melalui server relay', { icao24 });
         return false;
       }
     } catch (error) {
-      blockchainLogger.log('error', 'Failed to verify flight data via relay server', {
+      blockchainLogger.log('error', 'Gagal memverifikasi data penerbangan melalui server relay', {
         icao24,
         error: error.message
       });
@@ -183,7 +183,7 @@ class RelayBlockchainSystem {
       
       return data.flights.find(f => f.icao24 === icao24) || null;
     } catch (error) {
-      blockchainLogger.log('error', 'Failed to get flight data via relay server', {
+      blockchainLogger.log('error', 'Gagal mendapatkan data penerbangan melalui server relay', {
         icao24,
         error: error.message
       });
@@ -198,13 +198,13 @@ class RelayBlockchainSystem {
       const response = await fetch(`${this.relayUrl}/flights`);
       const data = await response.json();
       
-      blockchainLogger.log('info', 'Retrieved all flights via relay server', {
+      blockchainLogger.log('info', 'Berhasil mengambil semua data penerbangan melalui server relay', {
         count: data.flights.length
       });
       
       return data.flights;
     } catch (error) {
-      blockchainLogger.log('error', 'Failed to get all flights via relay server', {
+      blockchainLogger.log('error', 'Gagal mengambil semua data penerbangan melalui server relay', {
         error: error.message
       });
       return [];
@@ -220,7 +220,7 @@ class RelayBlockchainSystem {
       
       return data.flights;
     } catch (error) {
-      blockchainLogger.log('error', 'Failed to get latest flights via relay server', {
+      blockchainLogger.log('error', 'Gagal mengambil penerbangan terbaru melalui server relay', {
         error: error.message
       });
       return [];
@@ -238,7 +238,7 @@ class RelayBlockchainSystem {
       });
 
       const result = await response.json();
-      console.log('Relay /simulate-attack response:', result);
+      console.log('Respon /simulate-attack dari relay:', result);
 
       if (!response.ok || !result.success) {
         // Only throw for real network/server errors
@@ -246,15 +246,15 @@ class RelayBlockchainSystem {
       }
       
       if (result.detectedByBlockchain) {
-        console.log(`✅ Attack Prevented by Relay/Blockchain: ${result.reason}`);
-        blockchainLogger.log('error', `Attack Prevented: ${attackType}`, { 
+        console.log(`✅ Serangan Dicegah oleh Relay/Blockchain: ${result.reason}`);
+        blockchainLogger.log('error', `Serangan Dicegah: ${attackType}`, { 
           reason: result.reason,
           flight: result.targetFlight?.callsign,
           eventLogs: result.eventLogs
         });
       } else {
-        console.log(`ATTACK SUCCEEDED on Relay system. Hash: ${result.transactionHash}`);
-        blockchainLogger.log('success', `Attack Succeeded: ${attackType}`, {
+        console.log(`SERANGAN BERHASIL pada sistem Relay. Hash: ${result.transactionHash}`);
+        blockchainLogger.log('success', `Serangan Berhasil: ${attackType}`, {
           transaction: result.transactionHash,
           flight: result.targetFlight?.callsign,
           eventLogs: result.eventLogs
@@ -264,8 +264,8 @@ class RelayBlockchainSystem {
       return result;
 
     } catch (error) {
-      console.error('Error simulating attack via relay:', error);
-      blockchainLogger.log('error', 'Failed to simulate attack', { error: error.message });
+      console.error('Kesalahan saat mensimulasikan serangan via relay:', error);
+      blockchainLogger.log('error', 'Gagal mensimulasikan serangan', { error: error.message });
       throw error;
     }
   }

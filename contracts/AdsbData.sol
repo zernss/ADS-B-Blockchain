@@ -143,7 +143,7 @@ contract AdsbData {
             _icao24s.length == _isSpoofedFlags.length,
             "Array lengths must match"
         );
-        
+
         // Add batch size limit to prevent gas limit exceeded
         require(_icao24s.length <= 50, "Batch size too large (max 50)");
 
