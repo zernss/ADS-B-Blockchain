@@ -1,0 +1,471 @@
+[2025-06-26T04:26:52.626Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:26:52.627Z] [Relay] Sample flights: [{"icao24":"39de4d","callsign":"TVF769","origin_country":"France","latitude":49.0225,"longitude":2.5484,"altitude":129.54,"onGround":false,"velocity":5.14,"heading":84.38,"verticalRate":0,"timestamp":"2025-06-26T04:26:36.000Z","lastContact":"2025-06-26T04:26:44.000Z","isVerified":true},{"icao24":"511163","callsign":"RAM702","origin_country":"Estonia","latitude":48.8569,"longitude":2.5764,"altitude":3352.8,"onGround":false,"velocity":181.07,"heading":107.87,"verticalRate":-0.65,"timestamp":"2025-06-26T04:26:46.000Z","lastContact":"2025-06-26T04:26:46.000Z","isVerified":true},{"icao24":"511153","callsign":"TVS56T","origin_country":"Estonia","latitude":38.6541,"longitude":28.5251,"altitude":10668,"onGround":false,"velocity":244.24,"heading":130.13,"verticalRate":0.33,"timestamp":"2025-06-26T04:26:46.000Z","lastContact":"2025-06-26T04:26:46.000Z","isVerified":true}]
+[2025-06-26T04:26:52.629Z] [Relay] Processing batch of size 50
+[2025-06-26T04:26:52.715Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:26:52.715Z] [Relay] Processing batch of size 25
+[2025-06-26T04:26:52.853Z] [Relay] Processing batch of size 25
+[2025-06-26T04:26:52.962Z] [Relay] Batch summary: Success: 2, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:26:52.963Z] [Relay] Response to frontend: {"success":true,"successfulBatches":2,"failedBatches":0,"relayBlockedBatches":0,"simulationFailedBatches":0,"transactions":[{"transactionHash":"0xabd1a2c6a907f96edf616dbd8e2a8c5bce525a3f20a693c11bc45b1afb326851","blockNumber":2,"gasUsed":"4783545","flightsCount":25},{"transactionHash":"0xa11b17a484cd427ef1634177f4891a0ebc76354bb190adb4a82244e5349f47b8","blockNumber":3,"gasUsed":"4767237","flightsCount":25}],"failedFlights":[],"relayBlockedFlights":[],"simulationFailedFlights":[],"relayBlockedReasons":[],"simulationFailedReasons":[]}
+[2025-06-26T04:26:52.969Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:26:52.970Z] [Relay] Sample flights: [{"icao24":"471f64","callsign":"WMT825","origin_country":"Hungary","latitude":44.5898,"longitude":11.1556,"altitude":8069.58,"onGround":false,"velocity":204.3,"heading":290.49,"verticalRate":-8.78,"timestamp":"2025-06-26T04:26:46.000Z","lastContact":"2025-06-26T04:26:47.000Z","isVerified":true},{"icao24":"471f65","callsign":"WMT431","origin_country":"Hungary","latitude":44.6708,"longitude":24.606,"altitude":7886.7,"onGround":false,"velocity":200.1,"heading":279.17,"verticalRate":6.5,"timestamp":"2025-06-26T04:26:45.000Z","lastContact":"2025-06-26T04:26:46.000Z","isVerified":true},{"icao24":"471f62","callsign":"WMT8JS","origin_country":"Hungary","latitude":48.7278,"longitude":18.4254,"altitude":10972.8,"onGround":false,"velocity":209.96,"heading":286.66,"verticalRate":0,"timestamp":"2025-06-26T04:26:46.000Z","lastContact":"2025-06-26T04:26:46.000Z","isVerified":true}]
+[2025-06-26T04:26:52.970Z] [Relay] Processing batch of size 50
+[2025-06-26T04:26:53.015Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:26:53.016Z] [Relay] Processing batch of size 25
+[2025-06-26T04:26:53.048Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:26:53.049Z] [Relay] Sample flights: [{"icao24":"39de4d","callsign":"TVF769","origin_country":"France","latitude":49.0225,"longitude":2.5484,"altitude":129.54,"onGround":false,"velocity":5.14,"heading":84.38,"verticalRate":0,"timestamp":"2025-06-26T04:26:36.000Z","lastContact":"2025-06-26T04:26:41.000Z","isVerified":true},{"icao24":"511163","callsign":"RAM702","origin_country":"Estonia","latitude":48.8584,"longitude":2.5695,"altitude":3352.8,"onGround":false,"velocity":180.58,"heading":107.92,"verticalRate":-0.65,"timestamp":"2025-06-26T04:26:43.000Z","lastContact":"2025-06-26T04:26:43.000Z","isVerified":true},{"icao24":"511153","callsign":"TVS56T","origin_country":"Estonia","latitude":38.6595,"longitude":28.5169,"altitude":10668,"onGround":false,"velocity":244.24,"heading":130.13,"verticalRate":0.33,"timestamp":"2025-06-26T04:26:42.000Z","lastContact":"2025-06-26T04:26:43.000Z","isVerified":true}]
+[2025-06-26T04:26:53.049Z] [Relay] Processing batch of size 50
+[2025-06-26T04:26:53.099Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:26:53.100Z] [Relay] Processing batch of size 25
+[2025-06-26T04:26:53.108Z] [Relay] Processing batch of size 25
+[2025-06-26T04:26:53.186Z] [Relay] Processing batch of size 25
+[2025-06-26T04:26:53.188Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:26:53.188Z] [Relay] Processing batch of size 12
+[2025-06-26T04:26:53.263Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:26:53.263Z] [Relay] Processing batch of size 13
+[2025-06-26T04:26:53.264Z] [Relay] Batch summary: Success: 2, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:26:53.265Z] [Relay] Response to frontend: {"success":true,"successfulBatches":2,"failedBatches":0,"relayBlockedBatches":0,"simulationFailedBatches":0,"transactions":[{"transactionHash":"0x2772a658c1dda5e8ba4458c88ee6ce9a97a7a8f82a2061c6257145479682603e","blockNumber":5,"gasUsed":"940613","flightsCount":25},{"transactionHash":"0x6ad7c81323d629173de09a96f1d368bc915b5bbb95e7275d9d1861191e55ee26","blockNumber":6,"gasUsed":"963913","flightsCount":25}],"failedFlights":[],"relayBlockedFlights":[],"simulationFailedFlights":[],"relayBlockedReasons":[],"simulationFailedReasons":[]}
+[2025-06-26T04:26:53.273Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:26:53.273Z] [Relay] Sample flights: [{"icao24":"471f65","callsign":"WMT431","origin_country":"Hungary","latitude":44.6702,"longitude":24.6113,"altitude":7871.46,"onGround":false,"velocity":199.52,"heading":279.05,"verticalRate":6.83,"timestamp":"2025-06-26T04:26:43.000Z","lastContact":"2025-06-26T04:26:43.000Z","isVerified":true},{"icao24":"471f62","callsign":"WMT8JS","origin_country":"Hungary","latitude":48.726,"longitude":18.4339,"altitude":10980.42,"onGround":false,"velocity":209.96,"heading":286.66,"verticalRate":-0.33,"timestamp":"2025-06-26T04:26:43.000Z","lastContact":"2025-06-26T04:26:43.000Z","isVerified":true},{"icao24":"4400c8","callsign":"EJU35YD","origin_country":"Austria","latitude":40.1559,"longitude":15.4117,"altitude":8046.72,"onGround":false,"velocity":218.34,"heading":116.14,"verticalRate":6.18,"timestamp":"2025-06-26T04:26:43.000Z","lastContact":"2025-06-26T04:26:44.000Z","isVerified":true}]
+[2025-06-26T04:26:53.273Z] [Relay] Processing batch of size 50
+[2025-06-26T04:26:53.339Z] [Relay] Batch summary: Success: 2, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:26:53.340Z] [Relay] Response to frontend: {"success":true,"successfulBatches":2,"failedBatches":0,"relayBlockedBatches":0,"simulationFailedBatches":0,"transactions":[{"transactionHash":"0xc5f4288066cf4dd760daf68b34505b0dbb2018e9f695a6522292420fea95b88e","blockNumber":4,"gasUsed":"4766397","flightsCount":25},{"transactionHash":"0x772f5edda4512297da30f33f388cddcb3b90badc4c6e00d1f12be76393bdf2ce","blockNumber":7,"gasUsed":"2494080","flightsCount":13}],"failedFlights":[],"relayBlockedFlights":[],"simulationFailedFlights":[],"relayBlockedReasons":[],"simulationFailedReasons":[]}
+[2025-06-26T04:26:53.342Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:26:53.342Z] [Relay] Processing batch of size 25
+[2025-06-26T04:26:53.421Z] [Relay] Processing batch of size 25
+[2025-06-26T04:26:53.499Z] [Relay] Batch summary: Success: 2, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:26:53.500Z] [Relay] Response to frontend: {"success":true,"successfulBatches":2,"failedBatches":0,"relayBlockedBatches":0,"simulationFailedBatches":0,"transactions":[{"transactionHash":"0x5cd40ee669289d5289d0984750365c0e1592b79087cfd2719ab4ccd42cddb652","blockNumber":8,"gasUsed":"1095785","flightsCount":25},{"transactionHash":"0xa8f557855de9a9ca6f9c70d59b92363894143b8445c7fddd5c63fc7f8a62c961","blockNumber":9,"gasUsed":"2795973","flightsCount":25}],"failedFlights":[],"relayBlockedFlights":[],"simulationFailedFlights":[],"relayBlockedReasons":[],"simulationFailedReasons":[]}
+[2025-06-26T04:26:53.526Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:26:53.527Z] [Relay] Sample flights: [{"icao24":"39de4d","callsign":"TVF769","origin_country":"France","latitude":49.0225,"longitude":2.5484,"altitude":152.4,"onGround":false,"velocity":5.14,"heading":84.38,"verticalRate":0,"timestamp":"2025-06-26T04:26:36.000Z","lastContact":"2025-06-26T04:26:47.000Z","isVerified":true},{"icao24":"511163","callsign":"RAM702","origin_country":"Estonia","latitude":48.8554,"longitude":2.5834,"altitude":3352.8,"onGround":false,"velocity":181.07,"heading":107.87,"verticalRate":-0.33,"timestamp":"2025-06-26T04:26:49.000Z","lastContact":"2025-06-26T04:26:49.000Z","isVerified":true},{"icao24":"511153","callsign":"TVS56T","origin_country":"Estonia","latitude":38.6494,"longitude":28.5322,"altitude":10675.62,"onGround":false,"velocity":244.24,"heading":130.13,"verticalRate":0,"timestamp":"2025-06-26T04:26:50.000Z","lastContact":"2025-06-26T04:26:50.000Z","isVerified":true}]
+[2025-06-26T04:26:53.527Z] [Relay] Processing batch of size 50
+[2025-06-26T04:26:53.640Z] [Relay] Batch summary: Success: 1, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:26:53.640Z] [Relay] Response to frontend: {"success":true,"successfulBatches":1,"failedBatches":0,"relayBlockedBatches":0,"simulationFailedBatches":0,"transactions":[{"transactionHash":"0xa953086cdeb53737f0212a33c4de33e5831da760311581d9716fadd13a1a0acd","blockNumber":10,"gasUsed":"1882842","flightsCount":50}],"failedFlights":[],"relayBlockedFlights":[],"simulationFailedFlights":[],"relayBlockedReasons":[],"simulationFailedReasons":[]}
+[2025-06-26T04:26:53.646Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:26:53.646Z] [Relay] Sample flights: [{"icao24":"471f64","callsign":"WMT825","origin_country":"Hungary","latitude":44.5918,"longitude":11.1482,"altitude":8039.1,"onGround":false,"velocity":204.3,"heading":290.49,"verticalRate":-8.78,"timestamp":"2025-06-26T04:26:50.000Z","lastContact":"2025-06-26T04:26:50.000Z","isVerified":true},{"icao24":"471f65","callsign":"WMT431","origin_country":"Hungary","latitude":44.6717,"longitude":24.5981,"altitude":7909.56,"onGround":false,"velocity":200.61,"heading":279.15,"verticalRate":6.5,"timestamp":"2025-06-26T04:26:48.000Z","lastContact":"2025-06-26T04:26:49.000Z","isVerified":true},{"icao24":"471f62","callsign":"WMT8JS","origin_country":"Hungary","latitude":48.7294,"longitude":18.4168,"altitude":10972.8,"onGround":false,"velocity":209.96,"heading":286.66,"verticalRate":0,"timestamp":"2025-06-26T04:26:49.000Z","lastContact":"2025-06-26T04:26:49.000Z","isVerified":true}]
+[2025-06-26T04:26:53.647Z] [Relay] Processing batch of size 50
+[2025-06-26T04:26:53.692Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:26:53.692Z] [Relay] Processing batch of size 25
+[2025-06-26T04:26:53.780Z] [Relay] Processing batch of size 25
+[2025-06-26T04:26:53.808Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:26:53.808Z] [Relay] Processing batch of size 12
+[2025-06-26T04:26:53.846Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:26:53.846Z] [Relay] Processing batch of size 13
+[2025-06-26T04:26:53.919Z] [Relay] Batch summary: Success: 2, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:26:53.920Z] [Relay] Response to frontend: {"success":true,"successfulBatches":2,"failedBatches":0,"relayBlockedBatches":0,"simulationFailedBatches":0,"transactions":[{"transactionHash":"0xf31c64f7f18cde27f941f37e0b94ad4c664581312c27c05baec00be9660b444f","blockNumber":11,"gasUsed":"1098309","flightsCount":25},{"transactionHash":"0x47a5efecd9d27d3fa4b99f26ec1b083c87594429540a1777c614adb69fe36bf4","blockNumber":12,"gasUsed":"514580","flightsCount":13}],"failedFlights":[],"relayBlockedFlights":[],"simulationFailedFlights":[],"relayBlockedReasons":[],"simulationFailedReasons":[]}
+[2025-06-26T04:27:08.092Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:27:08.093Z] [Relay] Sample flights: [{"icao24":"39de4d","callsign":"TVF769","origin_country":"France","latitude":49.0211,"longitude":2.522,"altitude":403.86,"onGround":false,"velocity":72.76,"heading":265.54,"verticalRate":16.91,"timestamp":"2025-06-26T04:27:04.000Z","lastContact":"2025-06-26T04:27:04.000Z","isVerified":true},{"icao24":"511163","callsign":"RAM702","origin_country":"Estonia","latitude":48.848,"longitude":2.6192,"altitude":3352.8,"onGround":false,"velocity":182.08,"heading":107.26,"verticalRate":0,"timestamp":"2025-06-26T04:27:04.000Z","lastContact":"2025-06-26T04:27:04.000Z","isVerified":true},{"icao24":"511153","callsign":"TVS56T","origin_country":"Estonia","latitude":38.6281,"longitude":28.5642,"altitude":10675.62,"onGround":false,"velocity":244.74,"heading":130.82,"verticalRate":0,"timestamp":"2025-06-26T04:27:05.000Z","lastContact":"2025-06-26T04:27:05.000Z","isVerified":true}]
+[2025-06-26T04:27:08.093Z] [Relay] Processing batch of size 50
+[2025-06-26T04:27:08.124Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:27:08.125Z] [Relay] Processing batch of size 25
+[2025-06-26T04:27:08.160Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:27:08.161Z] [Relay] Processing batch of size 25
+[2025-06-26T04:27:08.184Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:27:08.185Z] [Relay] Processing batch of size 12
+[2025-06-26T04:27:08.220Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:27:08.221Z] [Relay] Processing batch of size 13
+[2025-06-26T04:27:08.257Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:27:08.258Z] [Relay] Processing batch of size 12
+[2025-06-26T04:27:08.283Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:27:08.283Z] [Relay] Processing batch of size 13
+[2025-06-26T04:27:08.311Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:27:08.312Z] [Relay] Batch summary: Success: 0, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:27:08.320Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:27:08.320Z] [Relay] Sample flights: [{"icao24":"471f64","callsign":"WMT825","origin_country":"Hungary","latitude":44.6014,"longitude":11.1123,"altitude":7924.8,"onGround":false,"velocity":203.51,"heading":290.73,"verticalRate":-5.53,"timestamp":"2025-06-26T04:27:05.000Z","lastContact":"2025-06-26T04:27:05.000Z","isVerified":true},{"icao24":"471f65","callsign":"WMT431","origin_country":"Hungary","latitude":44.6761,"longitude":24.5596,"altitude":8008.62,"onGround":false,"velocity":201.63,"heading":279.1,"verticalRate":6.18,"timestamp":"2025-06-26T04:27:04.000Z","lastContact":"2025-06-26T04:27:04.000Z","isVerified":true},{"icao24":"471f62","callsign":"WMT8JS","origin_country":"Hungary","latitude":48.7376,"longitude":18.3753,"altitude":10972.8,"onGround":false,"velocity":209.81,"heading":286.52,"verticalRate":-0.33,"timestamp":"2025-06-26T04:27:04.000Z","lastContact":"2025-06-26T04:27:04.000Z","isVerified":true}]
+[2025-06-26T04:27:08.321Z] [Relay] Processing batch of size 50
+[2025-06-26T04:27:08.346Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:27:08.347Z] [Relay] Processing batch of size 25
+[2025-06-26T04:27:08.366Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:27:08.367Z] [Relay] Processing batch of size 25
+[2025-06-26T04:27:08.393Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:27:08.393Z] [Relay] Processing batch of size 12
+[2025-06-26T04:27:08.422Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:27:08.423Z] [Relay] Processing batch of size 13
+[2025-06-26T04:27:08.452Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:27:08.452Z] [Relay] Processing batch of size 12
+[2025-06-26T04:27:08.469Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:27:08.470Z] [Relay] Processing batch of size 13
+[2025-06-26T04:27:08.500Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:27:08.500Z] [Relay] Batch summary: Success: 0, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:27:18.442Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:27:18.443Z] [Relay] Sample flights: [{"icao24":"39de4d","callsign":"TVF769","origin_country":"France","latitude":49.0214,"longitude":2.5269,"altitude":320.04,"onGround":false,"velocity":72.8,"heading":265.14,"verticalRate":15.93,"timestamp":"2025-06-26T04:26:59.000Z","lastContact":"2025-06-26T04:26:59.000Z","isVerified":true},{"icao24":"511163","callsign":"RAM702","origin_country":"Estonia","latitude":48.8505,"longitude":2.6066,"altitude":3352.8,"onGround":false,"velocity":182.39,"heading":107.57,"verticalRate":-0.33,"timestamp":"2025-06-26T04:26:59.000Z","lastContact":"2025-06-26T04:26:59.000Z","isVerified":true},{"icao24":"511153","callsign":"TVS56T","origin_country":"Estonia","latitude":38.6358,"longitude":28.5528,"altitude":10675.62,"onGround":false,"velocity":244.57,"heading":130.22,"verticalRate":0,"timestamp":"2025-06-26T04:26:59.000Z","lastContact":"2025-06-26T04:26:59.000Z","isVerified":true}]
+[2025-06-26T04:27:18.443Z] [Relay] Processing batch of size 50
+[2025-06-26T04:27:18.476Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:27:18.477Z] [Relay] Processing batch of size 25
+[2025-06-26T04:27:18.507Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:27:18.508Z] [Relay] Processing batch of size 25
+[2025-06-26T04:27:18.543Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:27:18.544Z] [Relay] Processing batch of size 12
+[2025-06-26T04:27:18.564Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:27:18.565Z] [Relay] Processing batch of size 13
+[2025-06-26T04:27:18.601Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:27:18.602Z] [Relay] Processing batch of size 12
+[2025-06-26T04:27:18.632Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:27:18.634Z] [Relay] Processing batch of size 13
+[2025-06-26T04:27:18.670Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:27:18.670Z] [Relay] Batch summary: Success: 0, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:27:18.674Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:27:18.675Z] [Relay] Sample flights: [{"icao24":"471f67","callsign":"WMT4644","origin_country":"Hungary","latitude":44.9757,"longitude":17.1254,"altitude":10972.8,"onGround":false,"velocity":222.93,"heading":275.96,"verticalRate":0,"timestamp":"2025-06-26T04:26:59.000Z","lastContact":"2025-06-26T04:26:59.000Z","isVerified":true},{"icao24":"471f64","callsign":"WMT825","origin_country":"Hungary","latitude":44.5982,"longitude":11.1243,"altitude":7955.28,"onGround":false,"velocity":203.81,"heading":290.54,"verticalRate":-7.15,"timestamp":"2025-06-26T04:27:00.000Z","lastContact":"2025-06-26T04:27:00.000Z","isVerified":true},{"icao24":"471f65","callsign":"WMT431","origin_country":"Hungary","latitude":44.6747,"longitude":24.5721,"altitude":7978.14,"onGround":false,"velocity":201.63,"heading":279.1,"verticalRate":6.5,"timestamp":"2025-06-26T04:26:59.000Z","lastContact":"2025-06-26T04:26:59.000Z","isVerified":true}]
+[2025-06-26T04:27:18.676Z] [Relay] Processing batch of size 50
+[2025-06-26T04:27:18.723Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:27:18.723Z] [Relay] Processing batch of size 25
+[2025-06-26T04:27:18.773Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:27:18.774Z] [Relay] Processing batch of size 25
+[2025-06-26T04:27:18.794Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:27:18.795Z] [Relay] Processing batch of size 12
+[2025-06-26T04:27:18.863Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:27:18.864Z] [Relay] Processing batch of size 13
+[2025-06-26T04:27:18.894Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:27:18.895Z] [Relay] Processing batch of size 12
+[2025-06-26T04:27:18.961Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:27:18.962Z] [Relay] Processing batch of size 13
+[2025-06-26T04:27:19.004Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:27:19.004Z] [Relay] Batch summary: Success: 0, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:27:24.267Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:27:24.267Z] [Relay] Sample flights: [{"icao24":"39de4d","callsign":"TVF769","origin_country":"France","latitude":49.0209,"longitude":2.5184,"altitude":464.82,"onGround":false,"velocity":72.29,"heading":265.1,"verticalRate":17.23,"timestamp":"2025-06-26T04:27:07.000Z","lastContact":"2025-06-26T04:27:08.000Z","isVerified":true},{"icao24":"511163","callsign":"RAM702","origin_country":"Estonia","latitude":48.8462,"longitude":2.6278,"altitude":3352.8,"onGround":false,"velocity":181.93,"heading":107.1,"verticalRate":-0.33,"timestamp":"2025-06-26T04:27:08.000Z","lastContact":"2025-06-26T04:27:08.000Z","isVerified":true},{"icao24":"511153","callsign":"TVS56T","origin_country":"Estonia","latitude":38.6227,"longitude":28.572,"altitude":10675.62,"onGround":false,"velocity":244.88,"heading":131.59,"verticalRate":0,"timestamp":"2025-06-26T04:27:08.000Z","lastContact":"2025-06-26T04:27:08.000Z","isVerified":true}]
+[2025-06-26T04:27:24.268Z] [Relay] Processing batch of size 50
+[2025-06-26T04:27:24.298Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:27:24.299Z] [Relay] Processing batch of size 25
+[2025-06-26T04:27:24.330Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:27:24.333Z] [Relay] Processing batch of size 25
+[2025-06-26T04:27:24.361Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:27:24.361Z] [Relay] Processing batch of size 12
+[2025-06-26T04:27:24.382Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:27:24.383Z] [Relay] Processing batch of size 13
+[2025-06-26T04:27:24.426Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:27:24.427Z] [Relay] Processing batch of size 12
+[2025-06-26T04:27:24.442Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:27:24.443Z] [Relay] Processing batch of size 13
+[2025-06-26T04:27:24.475Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:27:24.476Z] [Relay] Batch summary: Success: 0, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:27:24.480Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:27:24.480Z] [Relay] Sample flights: [{"icao24":"471f64","callsign":"WMT825","origin_country":"Hungary","latitude":44.604,"longitude":11.1025,"altitude":7901.94,"onGround":false,"velocity":202.85,"heading":290.64,"verticalRate":-4.55,"timestamp":"2025-06-26T04:27:09.000Z","lastContact":"2025-06-26T04:27:09.000Z","isVerified":true},{"icao24":"471f65","callsign":"WMT431","origin_country":"Hungary","latitude":44.6773,"longitude":24.5496,"altitude":8031.48,"onGround":false,"velocity":202.14,"heading":279.08,"verticalRate":6.18,"timestamp":"2025-06-26T04:27:08.000Z","lastContact":"2025-06-26T04:27:08.000Z","isVerified":true},{"icao24":"471f62","callsign":"WMT8JS","origin_country":"Hungary","latitude":48.7396,"longitude":18.3652,"altitude":10972.8,"onGround":false,"velocity":209.81,"heading":286.52,"verticalRate":-0.33,"timestamp":"2025-06-26T04:27:08.000Z","lastContact":"2025-06-26T04:27:08.000Z","isVerified":true}]
+[2025-06-26T04:27:24.481Z] [Relay] Processing batch of size 50
+[2025-06-26T04:27:24.517Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:27:24.518Z] [Relay] Processing batch of size 25
+[2025-06-26T04:27:24.542Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:27:24.542Z] [Relay] Processing batch of size 25
+[2025-06-26T04:27:24.576Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:27:24.576Z] [Relay] Processing batch of size 12
+[2025-06-26T04:27:24.606Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:27:24.607Z] [Relay] Processing batch of size 13
+[2025-06-26T04:27:24.649Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:27:24.649Z] [Relay] Processing batch of size 12
+[2025-06-26T04:27:24.693Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:27:24.693Z] [Relay] Processing batch of size 13
+[2025-06-26T04:27:24.710Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:27:24.713Z] [Relay] Batch summary: Success: 0, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:27:41.146Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:27:41.146Z] [Relay] Sample flights: [{"icao24":"39de4d","callsign":"TVF769","origin_country":"France","latitude":49.0225,"longitude":2.5484,"altitude":152.4,"onGround":false,"velocity":5.14,"heading":84.38,"verticalRate":0,"timestamp":"2025-06-26T04:26:36.000Z","lastContact":"2025-06-26T04:26:47.000Z","isVerified":true},{"icao24":"511163","callsign":"RAM702","origin_country":"Estonia","latitude":48.8554,"longitude":2.5834,"altitude":3352.8,"onGround":false,"velocity":181.07,"heading":107.87,"verticalRate":-0.33,"timestamp":"2025-06-26T04:26:49.000Z","lastContact":"2025-06-26T04:26:49.000Z","isVerified":true},{"icao24":"511153","callsign":"TVS56T","origin_country":"Estonia","latitude":38.6494,"longitude":28.5322,"altitude":10675.62,"onGround":false,"velocity":244.24,"heading":130.13,"verticalRate":0,"timestamp":"2025-06-26T04:26:50.000Z","lastContact":"2025-06-26T04:26:50.000Z","isVerified":true}]
+[2025-06-26T04:27:41.147Z] [Relay] Processing batch of size 50
+[2025-06-26T04:27:41.245Z] [Relay] Batch summary: Success: 1, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:27:41.245Z] [Relay] Response to frontend: {"success":true,"successfulBatches":1,"failedBatches":0,"relayBlockedBatches":0,"simulationFailedBatches":0,"transactions":[{"transactionHash":"0xb45c6db5ea2d1de093c9e9be83be98027f4d421ec31135632e1109ecdda0bf86","blockNumber":13,"gasUsed":"1557922","flightsCount":50}],"failedFlights":[],"relayBlockedFlights":[],"simulationFailedFlights":[],"relayBlockedReasons":[],"simulationFailedReasons":[]}
+[2025-06-26T04:27:41.261Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:27:41.262Z] [Relay] Sample flights: [{"icao24":"471f64","callsign":"WMT825","origin_country":"Hungary","latitude":44.5918,"longitude":11.1482,"altitude":8039.1,"onGround":false,"velocity":204.3,"heading":290.49,"verticalRate":-8.78,"timestamp":"2025-06-26T04:26:50.000Z","lastContact":"2025-06-26T04:26:50.000Z","isVerified":true},{"icao24":"471f65","callsign":"WMT431","origin_country":"Hungary","latitude":44.6717,"longitude":24.5981,"altitude":7909.56,"onGround":false,"velocity":200.61,"heading":279.15,"verticalRate":6.5,"timestamp":"2025-06-26T04:26:48.000Z","lastContact":"2025-06-26T04:26:49.000Z","isVerified":true},{"icao24":"471f62","callsign":"WMT8JS","origin_country":"Hungary","latitude":48.7294,"longitude":18.4168,"altitude":10972.8,"onGround":false,"velocity":209.96,"heading":286.66,"verticalRate":0,"timestamp":"2025-06-26T04:26:49.000Z","lastContact":"2025-06-26T04:26:49.000Z","isVerified":true}]
+[2025-06-26T04:27:41.262Z] [Relay] Processing batch of size 50
+[2025-06-26T04:27:41.337Z] [Relay] Batch summary: Success: 1, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:27:41.337Z] [Relay] Response to frontend: {"success":true,"successfulBatches":1,"failedBatches":0,"relayBlockedBatches":0,"simulationFailedBatches":0,"transactions":[{"transactionHash":"0x767de6e0d4ab397a0d3eefa93f66651634962649ee7d0bd71d06abbcdcb9a323","blockNumber":14,"gasUsed":"1636706","flightsCount":50}],"failedFlights":[],"relayBlockedFlights":[],"simulationFailedFlights":[],"relayBlockedReasons":[],"simulationFailedReasons":[]}
+[2025-06-26T04:27:42.900Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:27:42.901Z] [Relay] Sample flights: [{"icao24":"39de4d","callsign":"TVF769","origin_country":"France","latitude":49.0209,"longitude":2.5184,"altitude":464.82,"onGround":false,"velocity":72.29,"heading":265.1,"verticalRate":17.23,"timestamp":"2025-06-26T04:27:07.000Z","lastContact":"2025-06-26T04:27:08.000Z","isVerified":true},{"icao24":"511163","callsign":"RAM702","origin_country":"Estonia","latitude":48.8462,"longitude":2.6278,"altitude":3352.8,"onGround":false,"velocity":181.93,"heading":107.1,"verticalRate":-0.33,"timestamp":"2025-06-26T04:27:08.000Z","lastContact":"2025-06-26T04:27:08.000Z","isVerified":true},{"icao24":"511153","callsign":"TVS56T","origin_country":"Estonia","latitude":38.6227,"longitude":28.572,"altitude":10675.62,"onGround":false,"velocity":244.88,"heading":131.59,"verticalRate":0,"timestamp":"2025-06-26T04:27:08.000Z","lastContact":"2025-06-26T04:27:08.000Z","isVerified":true}]
+[2025-06-26T04:27:42.901Z] [Relay] Processing batch of size 50
+[2025-06-26T04:27:42.912Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:27:42.913Z] [Relay] Processing batch of size 25
+[2025-06-26T04:27:42.941Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:27:42.941Z] [Relay] Processing batch of size 25
+[2025-06-26T04:27:42.955Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:27:42.955Z] [Relay] Processing batch of size 12
+[2025-06-26T04:27:42.982Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:27:42.983Z] [Relay] Processing batch of size 13
+[2025-06-26T04:27:43.001Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:27:43.001Z] [Relay] Processing batch of size 12
+[2025-06-26T04:27:43.011Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:27:43.012Z] [Relay] Processing batch of size 13
+[2025-06-26T04:27:43.024Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:27:43.025Z] [Relay] Batch summary: Success: 0, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:27:43.032Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:27:43.032Z] [Relay] Sample flights: [{"icao24":"471f64","callsign":"WMT825","origin_country":"Hungary","latitude":44.604,"longitude":11.1025,"altitude":7901.94,"onGround":false,"velocity":202.85,"heading":290.64,"verticalRate":-4.55,"timestamp":"2025-06-26T04:27:09.000Z","lastContact":"2025-06-26T04:27:09.000Z","isVerified":true},{"icao24":"471f65","callsign":"WMT431","origin_country":"Hungary","latitude":44.6773,"longitude":24.5496,"altitude":8031.48,"onGround":false,"velocity":202.14,"heading":279.08,"verticalRate":6.18,"timestamp":"2025-06-26T04:27:08.000Z","lastContact":"2025-06-26T04:27:08.000Z","isVerified":true},{"icao24":"471f62","callsign":"WMT8JS","origin_country":"Hungary","latitude":48.7396,"longitude":18.3652,"altitude":10972.8,"onGround":false,"velocity":209.81,"heading":286.52,"verticalRate":-0.33,"timestamp":"2025-06-26T04:27:08.000Z","lastContact":"2025-06-26T04:27:08.000Z","isVerified":true}]
+[2025-06-26T04:27:43.032Z] [Relay] Processing batch of size 50
+[2025-06-26T04:27:43.059Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:27:43.060Z] [Relay] Processing batch of size 25
+[2025-06-26T04:27:43.080Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:27:43.080Z] [Relay] Processing batch of size 25
+[2025-06-26T04:27:43.090Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:27:43.091Z] [Relay] Processing batch of size 12
+[2025-06-26T04:27:43.105Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:27:43.106Z] [Relay] Processing batch of size 13
+[2025-06-26T04:27:43.127Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:27:43.127Z] [Relay] Processing batch of size 12
+[2025-06-26T04:27:43.151Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:27:43.151Z] [Relay] Processing batch of size 13
+[2025-06-26T04:27:43.167Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:27:43.167Z] [Relay] Batch summary: Success: 0, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:27:44.112Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:27:44.112Z] [Relay] Sample flights: [{"icao24":"39de4d","callsign":"TVF769","origin_country":"France","latitude":49.0225,"longitude":2.5484,"altitude":129.54,"onGround":false,"velocity":5.14,"heading":84.38,"verticalRate":0,"timestamp":"2025-06-26T04:26:36.000Z","lastContact":"2025-06-26T04:26:41.000Z","isVerified":true},{"icao24":"511163","callsign":"RAM702","origin_country":"Estonia","latitude":48.8584,"longitude":2.5695,"altitude":3352.8,"onGround":false,"velocity":180.58,"heading":107.92,"verticalRate":-0.65,"timestamp":"2025-06-26T04:26:43.000Z","lastContact":"2025-06-26T04:26:43.000Z","isVerified":true},{"icao24":"511153","callsign":"TVS56T","origin_country":"Estonia","latitude":38.6595,"longitude":28.5169,"altitude":10668,"onGround":false,"velocity":244.24,"heading":130.13,"verticalRate":0.33,"timestamp":"2025-06-26T04:26:42.000Z","lastContact":"2025-06-26T04:26:43.000Z","isVerified":true}]
+[2025-06-26T04:27:44.112Z] [Relay] Processing batch of size 50
+[2025-06-26T04:27:44.143Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:27:44.143Z] [Relay] Processing batch of size 25
+[2025-06-26T04:27:44.174Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:27:44.174Z] [Relay] Processing batch of size 25
+[2025-06-26T04:27:44.200Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:27:44.201Z] [Relay] Processing batch of size 12
+[2025-06-26T04:27:44.234Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:27:44.235Z] [Relay] Processing batch of size 13
+[2025-06-26T04:27:44.264Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:27:44.264Z] [Relay] Processing batch of size 12
+[2025-06-26T04:27:44.314Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:27:44.314Z] [Relay] Processing batch of size 13
+[2025-06-26T04:27:44.346Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:27:44.346Z] [Relay] Batch summary: Success: 0, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:27:44.355Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:27:44.356Z] [Relay] Sample flights: [{"icao24":"471f65","callsign":"WMT431","origin_country":"Hungary","latitude":44.6702,"longitude":24.6113,"altitude":7871.46,"onGround":false,"velocity":199.52,"heading":279.05,"verticalRate":6.83,"timestamp":"2025-06-26T04:26:43.000Z","lastContact":"2025-06-26T04:26:43.000Z","isVerified":true},{"icao24":"471f62","callsign":"WMT8JS","origin_country":"Hungary","latitude":48.726,"longitude":18.4339,"altitude":10980.42,"onGround":false,"velocity":209.96,"heading":286.66,"verticalRate":-0.33,"timestamp":"2025-06-26T04:26:43.000Z","lastContact":"2025-06-26T04:26:43.000Z","isVerified":true},{"icao24":"4400c8","callsign":"EJU35YD","origin_country":"Austria","latitude":40.1559,"longitude":15.4117,"altitude":8046.72,"onGround":false,"velocity":218.34,"heading":116.14,"verticalRate":6.18,"timestamp":"2025-06-26T04:26:43.000Z","lastContact":"2025-06-26T04:26:44.000Z","isVerified":true}]
+[2025-06-26T04:27:44.356Z] [Relay] Processing batch of size 50
+[2025-06-26T04:27:44.402Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:27:44.403Z] [Relay] Processing batch of size 25
+[2025-06-26T04:27:44.439Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:27:44.440Z] [Relay] Processing batch of size 25
+[2025-06-26T04:27:44.473Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:27:44.474Z] [Relay] Processing batch of size 12
+[2025-06-26T04:27:44.498Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:27:44.498Z] [Relay] Processing batch of size 13
+[2025-06-26T04:27:44.529Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:27:44.530Z] [Relay] Processing batch of size 12
+[2025-06-26T04:27:44.544Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:27:44.545Z] [Relay] Processing batch of size 13
+[2025-06-26T04:27:44.577Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:27:44.578Z] [Relay] Batch summary: Success: 0, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:27:48.072Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:27:48.072Z] [Relay] Sample flights: [{"icao24":"39de4d","callsign":"TVF769","origin_country":"France","latitude":49.0194,"longitude":2.4902,"altitude":975.36,"onGround":false,"velocity":69.68,"heading":265.34,"verticalRate":17.23,"timestamp":"2025-06-26T04:27:37.000Z","lastContact":"2025-06-26T04:27:37.000Z","isVerified":true},{"icao24":"511163","callsign":"RAM702","origin_country":"Estonia","latitude":48.8325,"longitude":2.6968,"altitude":3352.8,"onGround":false,"velocity":180.15,"heading":106.93,"verticalRate":-0.33,"timestamp":"2025-06-26T04:27:37.000Z","lastContact":"2025-06-26T04:27:37.000Z","isVerified":true},{"icao24":"511153","callsign":"TVS56T","origin_country":"Estonia","latitude":38.578,"longitude":28.6295,"altitude":10675.62,"onGround":false,"velocity":242.89,"heading":137.66,"verticalRate":0.33,"timestamp":"2025-06-26T04:27:37.000Z","lastContact":"2025-06-26T04:27:37.000Z","isVerified":true}]
+[2025-06-26T04:27:48.072Z] [Relay] Processing batch of size 50
+[2025-06-26T04:27:48.105Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:27:48.106Z] [Relay] Processing batch of size 25
+[2025-06-26T04:27:48.138Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:27:48.139Z] [Relay] Processing batch of size 25
+[2025-06-26T04:27:48.170Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:27:48.172Z] [Relay] Processing batch of size 12
+[2025-06-26T04:27:48.197Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:27:48.198Z] [Relay] Processing batch of size 13
+[2025-06-26T04:27:48.235Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:27:48.236Z] [Relay] Processing batch of size 12
+[2025-06-26T04:27:48.273Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:27:48.273Z] [Relay] Processing batch of size 13
+[2025-06-26T04:27:48.297Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:27:48.298Z] [Relay] Batch summary: Success: 0, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:27:48.302Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:27:48.303Z] [Relay] Sample flights: [{"icao24":"471f64","callsign":"WMT825","origin_country":"Hungary","latitude":44.6227,"longitude":11.0337,"altitude":7780.02,"onGround":false,"velocity":202.55,"heading":290.83,"verticalRate":-4.88,"timestamp":"2025-06-26T04:27:37.000Z","lastContact":"2025-06-26T04:27:38.000Z","isVerified":true},{"icao24":"471f65","callsign":"WMT431","origin_country":"Hungary","latitude":44.6854,"longitude":24.4774,"altitude":8221.98,"onGround":false,"velocity":204.68,"heading":278.97,"verticalRate":7.48,"timestamp":"2025-06-26T04:27:36.000Z","lastContact":"2025-06-26T04:27:36.000Z","isVerified":true},{"icao24":"471f62","callsign":"WMT8JS","origin_country":"Hungary","latitude":48.755,"longitude":18.286,"altitude":10965.18,"onGround":false,"velocity":209.67,"heading":286.39,"verticalRate":0,"timestamp":"2025-06-26T04:27:37.000Z","lastContact":"2025-06-26T04:27:37.000Z","isVerified":true}]
+[2025-06-26T04:27:48.304Z] [Relay] Processing batch of size 50
+[2025-06-26T04:27:48.339Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:27:48.340Z] [Relay] Processing batch of size 25
+[2025-06-26T04:27:48.366Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:27:48.366Z] [Relay] Processing batch of size 25
+[2025-06-26T04:27:48.410Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:27:48.411Z] [Relay] Processing batch of size 12
+[2025-06-26T04:27:48.437Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:27:48.437Z] [Relay] Processing batch of size 13
+[2025-06-26T04:27:48.473Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:27:48.474Z] [Relay] Processing batch of size 12
+[2025-06-26T04:27:48.511Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:27:48.511Z] [Relay] Processing batch of size 13
+[2025-06-26T04:27:48.541Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:27:48.542Z] [Relay] Batch summary: Success: 0, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:28:09.035Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:28:09.036Z] [Relay] Sample flights: [{"icao24":"39de4d","callsign":"TVF769","origin_country":"France","latitude":49.0174,"longitude":2.4629,"altitude":1409.7,"onGround":false,"velocity":81.87,"heading":263.14,"verticalRate":16.26,"timestamp":"2025-06-26T04:28:04.000Z","lastContact":"2025-06-26T04:28:04.000Z","isVerified":true},{"icao24":"511163","callsign":"RAM702","origin_country":"Estonia","latitude":48.82,"longitude":2.7598,"altitude":3352.8,"onGround":false,"velocity":183.45,"heading":106.45,"verticalRate":0,"timestamp":"2025-06-26T04:28:04.000Z","lastContact":"2025-06-26T04:28:04.000Z","isVerified":true},{"icao24":"511153","callsign":"TVS56T","origin_country":"Estonia","latitude":38.5325,"longitude":28.6775,"altitude":10683.24,"onGround":false,"velocity":240.87,"heading":142.81,"verticalRate":0,"timestamp":"2025-06-26T04:28:05.000Z","lastContact":"2025-06-26T04:28:05.000Z","isVerified":true}]
+[2025-06-26T04:28:09.036Z] [Relay] Processing batch of size 50
+[2025-06-26T04:28:09.072Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:28:09.073Z] [Relay] Processing batch of size 25
+[2025-06-26T04:28:09.102Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:28:09.102Z] [Relay] Processing batch of size 25
+[2025-06-26T04:28:09.115Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:28:09.116Z] [Relay] Processing batch of size 12
+[2025-06-26T04:28:09.148Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:28:09.148Z] [Relay] Processing batch of size 13
+[2025-06-26T04:28:09.171Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:28:09.171Z] [Relay] Processing batch of size 12
+[2025-06-26T04:28:09.196Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:28:09.197Z] [Relay] Processing batch of size 13
+[2025-06-26T04:28:09.227Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:28:09.227Z] [Relay] Batch summary: Success: 0, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:28:09.235Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:28:09.235Z] [Relay] Sample flights: [{"icao24":"471f64","callsign":"WMT825","origin_country":"Hungary","latitude":44.6402,"longitude":10.9695,"altitude":7642.86,"onGround":false,"velocity":200.63,"heading":291.04,"verticalRate":-4.55,"timestamp":"2025-06-26T04:28:05.000Z","lastContact":"2025-06-26T04:28:05.000Z","isVerified":true},{"icao24":"471f65","callsign":"WMT431","origin_country":"Hungary","latitude":44.6929,"longitude":24.411,"altitude":8404.86,"onGround":false,"velocity":205.69,"heading":278.92,"verticalRate":5.53,"timestamp":"2025-06-26T04:28:02.000Z","lastContact":"2025-06-26T04:28:03.000Z","isVerified":true},{"icao24":"471f62","callsign":"WMT8JS","origin_country":"Hungary","latitude":48.7693,"longitude":18.2127,"altitude":10972.8,"onGround":false,"velocity":209.67,"heading":286.39,"verticalRate":0,"timestamp":"2025-06-26T04:28:04.000Z","lastContact":"2025-06-26T04:28:04.000Z","isVerified":true}]
+[2025-06-26T04:28:09.235Z] [Relay] Processing batch of size 50
+[2025-06-26T04:28:09.252Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:28:09.252Z] [Relay] Processing batch of size 25
+[2025-06-26T04:28:09.275Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:28:09.275Z] [Relay] Processing batch of size 25
+[2025-06-26T04:28:09.306Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:28:09.306Z] [Relay] Processing batch of size 12
+[2025-06-26T04:28:09.347Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:28:09.348Z] [Relay] Processing batch of size 13
+[2025-06-26T04:28:09.390Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:28:09.390Z] [Relay] Processing batch of size 12
+[2025-06-26T04:28:09.414Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:28:09.415Z] [Relay] Processing batch of size 13
+[2025-06-26T04:28:09.457Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:28:09.457Z] [Relay] Batch summary: Success: 0, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:28:50.903Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:28:50.903Z] [Relay] Sample flights: [{"icao24":"39de4d","callsign":"TVF769","origin_country":"France","latitude":49.0121,"longitude":2.3997,"altitude":1882.14,"onGround":false,"velocity":128.13,"heading":262.62,"verticalRate":9.1,"timestamp":"2025-06-26T04:28:48.000Z","lastContact":"2025-06-26T04:28:48.000Z","isVerified":true},{"icao24":"511163","callsign":"RAM702","origin_country":"Estonia","latitude":48.8009,"longitude":2.8623,"altitude":3352.8,"onGround":false,"velocity":172.36,"heading":105.41,"verticalRate":-0.33,"timestamp":"2025-06-26T04:28:48.000Z","lastContact":"2025-06-26T04:28:48.000Z","isVerified":true},{"icao24":"511153","callsign":"TVS56T","origin_country":"Estonia","latitude":38.4554,"longitude":28.7469,"altitude":10683.24,"onGround":false,"velocity":239.22,"heading":144.81,"verticalRate":0,"timestamp":"2025-06-26T04:28:48.000Z","lastContact":"2025-06-26T04:28:48.000Z","isVerified":true}]
+[2025-06-26T04:28:50.903Z] [Relay] Processing batch of size 50
+[2025-06-26T04:28:50.942Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:28:50.943Z] [Relay] Processing batch of size 25
+[2025-06-26T04:28:50.971Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:28:50.972Z] [Relay] Processing batch of size 25
+[2025-06-26T04:28:51.002Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:28:51.003Z] [Relay] Processing batch of size 12
+[2025-06-26T04:28:51.022Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:28:51.023Z] [Relay] Processing batch of size 13
+[2025-06-26T04:28:51.054Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:28:51.054Z] [Relay] Processing batch of size 12
+[2025-06-26T04:28:51.081Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:28:51.081Z] [Relay] Processing batch of size 13
+[2025-06-26T04:28:51.113Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:28:51.113Z] [Relay] Batch summary: Success: 0, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:28:51.119Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:28:51.120Z] [Relay] Sample flights: [{"icao24":"471f64","callsign":"WMT825","origin_country":"Hungary","latitude":44.6682,"longitude":10.8668,"altitude":7467.6,"onGround":false,"velocity":197.68,"heading":290.89,"verticalRate":-4.88,"timestamp":"2025-06-26T04:28:49.000Z","lastContact":"2025-06-26T04:28:49.000Z","isVerified":true},{"icao24":"471f65","callsign":"WMT431","origin_country":"Hungary","latitude":44.7057,"longitude":24.2952,"altitude":8724.9,"onGround":false,"velocity":205.69,"heading":278.92,"verticalRate":3.9,"timestamp":"2025-06-26T04:28:47.000Z","lastContact":"2025-06-26T04:28:48.000Z","isVerified":true},{"icao24":"471f62","callsign":"WMT8JS","origin_country":"Hungary","latitude":48.7927,"longitude":18.0917,"altitude":10972.8,"onGround":false,"velocity":209.17,"heading":286.43,"verticalRate":0.33,"timestamp":"2025-06-26T04:28:48.000Z","lastContact":"2025-06-26T04:28:48.000Z","isVerified":true}]
+[2025-06-26T04:28:51.120Z] [Relay] Processing batch of size 50
+[2025-06-26T04:28:51.142Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:28:51.142Z] [Relay] Processing batch of size 25
+[2025-06-26T04:28:51.177Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:28:51.178Z] [Relay] Processing batch of size 25
+[2025-06-26T04:28:51.209Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:28:51.209Z] [Relay] Processing batch of size 12
+[2025-06-26T04:28:51.239Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:28:51.239Z] [Relay] Processing batch of size 13
+[2025-06-26T04:28:51.270Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:28:51.270Z] [Relay] Processing batch of size 12
+[2025-06-26T04:28:51.299Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:28:51.300Z] [Relay] Processing batch of size 13
+[2025-06-26T04:28:51.320Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:28:51.320Z] [Relay] Batch summary: Success: 0, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:29:16.561Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:29:16.562Z] [Relay] Sample flights: [{"icao24":"39de4d","callsign":"TVF769","origin_country":"France","latitude":49.0106,"longitude":2.3819,"altitude":1973.58,"onGround":false,"velocity":131.13,"heading":263.01,"verticalRate":9.43,"timestamp":"2025-06-26T04:28:58.000Z","lastContact":"2025-06-26T04:28:58.000Z","isVerified":true},{"icao24":"511163","callsign":"RAM702","origin_country":"Estonia","latitude":48.7969,"longitude":2.8844,"altitude":3352.8,"onGround":false,"velocity":170.1,"heading":105.26,"verticalRate":0.65,"timestamp":"2025-06-26T04:28:58.000Z","lastContact":"2025-06-26T04:28:58.000Z","isVerified":true},{"icao24":"511153","callsign":"TVS56T","origin_country":"Estonia","latitude":38.4383,"longitude":28.7622,"altitude":10683.24,"onGround":false,"velocity":239.22,"heading":144.81,"verticalRate":-0.33,"timestamp":"2025-06-26T04:28:58.000Z","lastContact":"2025-06-26T04:28:59.000Z","isVerified":true}]
+[2025-06-26T04:29:16.562Z] [Relay] Processing batch of size 50
+[2025-06-26T04:29:16.592Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:29:16.592Z] [Relay] Processing batch of size 25
+[2025-06-26T04:29:16.619Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:29:16.620Z] [Relay] Processing batch of size 25
+[2025-06-26T04:29:16.652Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:29:16.653Z] [Relay] Processing batch of size 12
+[2025-06-26T04:29:16.681Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:29:16.681Z] [Relay] Processing batch of size 13
+[2025-06-26T04:29:16.710Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:29:16.711Z] [Relay] Processing batch of size 12
+[2025-06-26T04:29:16.734Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:29:16.735Z] [Relay] Processing batch of size 13
+[2025-06-26T04:29:16.759Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:29:16.760Z] [Relay] Batch summary: Success: 0, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:29:16.766Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:29:16.767Z] [Relay] Sample flights: [{"icao24":"471f67","callsign":"WMT4644","origin_country":"Hungary","latitude":45,"longitude":16.7903,"altitude":10980.42,"onGround":false,"velocity":223.34,"heading":275.68,"verticalRate":0,"timestamp":"2025-06-26T04:28:58.000Z","lastContact":"2025-06-26T04:28:58.000Z","isVerified":true},{"icao24":"471f64","callsign":"WMT825","origin_country":"Hungary","latitude":44.6745,"longitude":10.8438,"altitude":7414.26,"onGround":false,"velocity":196.53,"heading":290.85,"verticalRate":-4.88,"timestamp":"2025-06-26T04:28:58.000Z","lastContact":"2025-06-26T04:28:59.000Z","isVerified":true},{"icao24":"471f65","callsign":"WMT431","origin_country":"Hungary","latitude":44.7088,"longitude":24.2679,"altitude":8763,"onGround":false,"velocity":207.73,"heading":278.83,"verticalRate":3.9,"timestamp":"2025-06-26T04:28:58.000Z","lastContact":"2025-06-26T04:28:58.000Z","isVerified":true}]
+[2025-06-26T04:29:16.768Z] [Relay] Processing batch of size 50
+[2025-06-26T04:29:16.805Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:29:16.806Z] [Relay] Processing batch of size 25
+[2025-06-26T04:29:16.844Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:29:16.845Z] [Relay] Processing batch of size 25
+[2025-06-26T04:29:16.887Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:29:16.888Z] [Relay] Processing batch of size 12
+[2025-06-26T04:29:16.921Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:29:16.921Z] [Relay] Processing batch of size 13
+[2025-06-26T04:29:16.948Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:29:16.948Z] [Relay] Processing batch of size 12
+[2025-06-26T04:29:16.972Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:29:16.973Z] [Relay] Processing batch of size 13
+[2025-06-26T04:29:17.012Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:29:17.014Z] [Relay] Batch summary: Success: 0, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:29:40.237Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:29:40.237Z] [Relay] Sample flights: [{"icao24":"39de4d","callsign":"TVF769","origin_country":"France","latitude":49.0051,"longitude":2.3102,"altitude":2354.58,"onGround":false,"velocity":136.24,"heading":263.28,"verticalRate":7.8,"timestamp":"2025-06-26T04:29:37.000Z","lastContact":"2025-06-26T04:29:37.000Z","isVerified":true},{"icao24":"511163","callsign":"RAM702","origin_country":"Estonia","latitude":48.781,"longitude":2.9717,"altitude":3345.18,"onGround":false,"velocity":166.13,"heading":105.63,"verticalRate":0.33,"timestamp":"2025-06-26T04:29:37.000Z","lastContact":"2025-06-26T04:29:37.000Z","isVerified":true},{"icao24":"511153","callsign":"TVS56T","origin_country":"Estonia","latitude":38.3692,"longitude":28.8239,"altitude":10675.62,"onGround":false,"velocity":238.33,"heading":145.11,"verticalRate":-0.33,"timestamp":"2025-06-26T04:29:37.000Z","lastContact":"2025-06-26T04:29:38.000Z","isVerified":true}]
+[2025-06-26T04:29:40.238Z] [Relay] Processing batch of size 50
+[2025-06-26T04:29:40.261Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:29:40.262Z] [Relay] Processing batch of size 25
+[2025-06-26T04:29:40.296Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:29:40.297Z] [Relay] Processing batch of size 25
+[2025-06-26T04:29:40.327Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:29:40.328Z] [Relay] Processing batch of size 12
+[2025-06-26T04:29:40.348Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:29:40.348Z] [Relay] Processing batch of size 13
+[2025-06-26T04:29:40.385Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:29:40.387Z] [Relay] Processing batch of size 12
+[2025-06-26T04:29:40.417Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:29:40.417Z] [Relay] Processing batch of size 13
+[2025-06-26T04:29:40.454Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:29:40.454Z] [Relay] Batch summary: Success: 0, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:29:40.461Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:29:40.462Z] [Relay] Sample flights: [{"icao24":"471f69","callsign":"WMT7AE","origin_country":"Hungary","latitude":44.7406,"longitude":26.1356,"altitude":2514.6,"onGround":false,"velocity":170.75,"heading":299.81,"verticalRate":18.21,"timestamp":"2025-06-26T04:29:37.000Z","lastContact":"2025-06-26T04:29:38.000Z","isVerified":true},{"icao24":"471f67","callsign":"WMT4644","origin_country":"Hungary","latitude":45.0077,"longitude":16.6806,"altitude":10980.42,"onGround":false,"velocity":222.83,"heading":275.7,"verticalRate":0,"timestamp":"2025-06-26T04:29:37.000Z","lastContact":"2025-06-26T04:29:37.000Z","isVerified":true},{"icao24":"471f64","callsign":"WMT825","origin_country":"Hungary","latitude":44.6988,"longitude":10.754,"altitude":7200.9,"onGround":false,"velocity":194.24,"heading":290.79,"verticalRate":-10.08,"timestamp":"2025-06-26T04:29:37.000Z","lastContact":"2025-06-26T04:29:38.000Z","isVerified":true}]
+[2025-06-26T04:29:40.463Z] [Relay] Processing batch of size 50
+[2025-06-26T04:29:40.497Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:29:40.498Z] [Relay] Processing batch of size 25
+[2025-06-26T04:29:40.524Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:29:40.524Z] [Relay] Processing batch of size 25
+[2025-06-26T04:29:40.549Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:29:40.550Z] [Relay] Processing batch of size 12
+[2025-06-26T04:29:40.625Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:29:40.626Z] [Relay] Processing batch of size 13
+[2025-06-26T04:29:40.638Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:29:40.638Z] [Relay] Processing batch of size 12
+[2025-06-26T04:29:40.670Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:29:40.671Z] [Relay] Processing batch of size 13
+[2025-06-26T04:29:40.687Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:29:40.687Z] [Relay] Batch summary: Success: 0, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:29:41.118Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:29:41.119Z] [Relay] Sample flights: [{"icao24":"39de4d","callsign":"TVF769","origin_country":"France","latitude":49.0051,"longitude":2.3102,"altitude":2354.58,"onGround":false,"velocity":136.24,"heading":263.28,"verticalRate":7.8,"timestamp":"2025-06-26T04:29:37.000Z","lastContact":"2025-06-26T04:29:37.000Z","isVerified":true},{"icao24":"511163","callsign":"RAM702","origin_country":"Estonia","latitude":48.781,"longitude":2.9717,"altitude":3345.18,"onGround":false,"velocity":166.13,"heading":105.63,"verticalRate":0.33,"timestamp":"2025-06-26T04:29:37.000Z","lastContact":"2025-06-26T04:29:37.000Z","isVerified":true},{"icao24":"511153","callsign":"TVS56T","origin_country":"Estonia","latitude":38.3692,"longitude":28.8239,"altitude":10675.62,"onGround":false,"velocity":238.33,"heading":145.11,"verticalRate":-0.33,"timestamp":"2025-06-26T04:29:37.000Z","lastContact":"2025-06-26T04:29:38.000Z","isVerified":true}]
+[2025-06-26T04:29:41.119Z] [Relay] Processing batch of size 50
+[2025-06-26T04:29:41.156Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:29:41.156Z] [Relay] Processing batch of size 25
+[2025-06-26T04:29:41.184Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:29:41.184Z] [Relay] Processing batch of size 25
+[2025-06-26T04:29:41.219Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:29:41.221Z] [Relay] Processing batch of size 12
+[2025-06-26T04:29:41.236Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:29:41.237Z] [Relay] Processing batch of size 13
+[2025-06-26T04:29:41.265Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:29:41.266Z] [Relay] Processing batch of size 12
+[2025-06-26T04:29:41.285Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:29:41.286Z] [Relay] Processing batch of size 13
+[2025-06-26T04:29:41.314Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:29:41.314Z] [Relay] Batch summary: Success: 0, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:29:41.320Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:29:41.320Z] [Relay] Sample flights: [{"icao24":"471f69","callsign":"WMT7AE","origin_country":"Hungary","latitude":44.7406,"longitude":26.1356,"altitude":2514.6,"onGround":false,"velocity":170.75,"heading":299.81,"verticalRate":18.21,"timestamp":"2025-06-26T04:29:37.000Z","lastContact":"2025-06-26T04:29:38.000Z","isVerified":true},{"icao24":"471f67","callsign":"WMT4644","origin_country":"Hungary","latitude":45.0077,"longitude":16.6806,"altitude":10980.42,"onGround":false,"velocity":222.83,"heading":275.7,"verticalRate":0,"timestamp":"2025-06-26T04:29:37.000Z","lastContact":"2025-06-26T04:29:37.000Z","isVerified":true},{"icao24":"471f64","callsign":"WMT825","origin_country":"Hungary","latitude":44.6988,"longitude":10.754,"altitude":7200.9,"onGround":false,"velocity":194.24,"heading":290.79,"verticalRate":-10.08,"timestamp":"2025-06-26T04:29:37.000Z","lastContact":"2025-06-26T04:29:38.000Z","isVerified":true}]
+[2025-06-26T04:29:41.321Z] [Relay] Processing batch of size 50
+[2025-06-26T04:29:41.375Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:29:41.376Z] [Relay] Processing batch of size 25
+[2025-06-26T04:29:41.422Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:29:41.422Z] [Relay] Processing batch of size 25
+[2025-06-26T04:29:41.490Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:29:41.491Z] [Relay] Processing batch of size 12
+[2025-06-26T04:29:41.537Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:29:41.537Z] [Relay] Processing batch of size 13
+[2025-06-26T04:29:41.563Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:29:41.564Z] [Relay] Processing batch of size 12
+[2025-06-26T04:29:41.594Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:29:41.594Z] [Relay] Processing batch of size 13
+[2025-06-26T04:29:41.624Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:29:41.624Z] [Relay] Batch summary: Success: 0, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:30:12.731Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:30:12.731Z] [Relay] Sample flights: [{"icao24":"39de4d","callsign":"TVF769","origin_country":"France","latitude":49.0009,"longitude":2.2532,"altitude":2438.4,"onGround":false,"velocity":133.91,"heading":264.27,"verticalRate":0,"timestamp":"2025-06-26T04:30:08.000Z","lastContact":"2025-06-26T04:30:08.000Z","isVerified":true},{"icao24":"511163","callsign":"RAM702","origin_country":"Estonia","latitude":48.7694,"longitude":3.0361,"altitude":3352.8,"onGround":false,"velocity":156.61,"heading":105.04,"verticalRate":-0.33,"timestamp":"2025-06-26T04:30:08.000Z","lastContact":"2025-06-26T04:30:08.000Z","isVerified":true},{"icao24":"511153","callsign":"TVS56T","origin_country":"Estonia","latitude":38.3155,"longitude":28.8714,"altitude":10668,"onGround":false,"velocity":237.91,"heading":145.04,"verticalRate":-0.33,"timestamp":"2025-06-26T04:30:08.000Z","lastContact":"2025-06-26T04:30:08.000Z","isVerified":true}]
+[2025-06-26T04:30:12.731Z] [Relay] Processing batch of size 50
+[2025-06-26T04:30:12.762Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:30:12.762Z] [Relay] Processing batch of size 25
+[2025-06-26T04:30:12.793Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:30:12.793Z] [Relay] Processing batch of size 25
+[2025-06-26T04:30:12.813Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:30:12.814Z] [Relay] Processing batch of size 12
+[2025-06-26T04:30:12.839Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:30:12.839Z] [Relay] Processing batch of size 13
+[2025-06-26T04:30:12.849Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:30:12.849Z] [Relay] Processing batch of size 12
+[2025-06-26T04:30:12.870Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:30:12.870Z] [Relay] Processing batch of size 13
+[2025-06-26T04:30:12.899Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:30:12.900Z] [Relay] Batch summary: Success: 0, Failed: 0, Relay Blocked: 0, Simulation Failed: 0
+[2025-06-26T04:30:12.907Z] [Relay] Received batch from frontend. Number of flights: 50
+[2025-06-26T04:30:12.907Z] [Relay] Sample flights: [{"icao24":"4a2021","callsign":"HLJ112","origin_country":"Romania","latitude":48.2052,"longitude":15.5573,"altitude":9898.38,"onGround":false,"velocity":242.05,"heading":187.94,"verticalRate":5.2,"timestamp":"2025-06-26T04:30:08.000Z","lastContact":"2025-06-26T04:30:08.000Z","isVerified":true},{"icao24":"471f69","callsign":"WMT7AE","origin_country":"Hungary","latitude":44.7624,"longitude":26.0789,"altitude":3116.58,"onGround":false,"velocity":162.21,"heading":297.38,"verticalRate":14.31,"timestamp":"2025-06-26T04:30:08.000Z","lastContact":"2025-06-26T04:30:08.000Z","isVerified":true},{"icao24":"471f67","callsign":"WMT4644","origin_country":"Hungary","latitude":45.0138,"longitude":16.5943,"altitude":10972.8,"onGround":false,"velocity":222.78,"heading":275.57,"verticalRate":0,"timestamp":"2025-06-26T04:30:07.000Z","lastContact":"2025-06-26T04:30:08.000Z","isVerified":true}]
+[2025-06-26T04:30:12.908Z] [Relay] Processing batch of size 50
+[2025-06-26T04:30:12.932Z] 🔄 Membagi batch 50 menjadi 25 dan 25
+[2025-06-26T04:30:12.933Z] [Relay] Processing batch of size 25
+[2025-06-26T04:30:12.951Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:30:12.952Z] [Relay] Processing batch of size 25
+[2025-06-26T04:30:12.961Z] 🔄 Membagi batch 25 menjadi 12 dan 13
+[2025-06-26T04:30:12.962Z] [Relay] Processing batch of size 12
+[2025-06-26T04:30:12.982Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:30:12.983Z] [Relay] Processing batch of size 13
+[2025-06-26T04:30:12.994Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:30:12.995Z] [Relay] Processing batch of size 12
+[2025-06-26T04:30:13.011Z] 🔄 Membagi batch 12 menjadi 6 dan 6
+[2025-06-26T04:30:13.012Z] [Relay] Processing batch of size 13
+[2025-06-26T04:30:13.039Z] 🔄 Membagi batch 13 menjadi 6 dan 7
+[2025-06-26T04:30:13.039Z] [Relay] Batch summary: Success: 0, Failed: 0, Relay Blocked: 0, Simulation Failed: 0

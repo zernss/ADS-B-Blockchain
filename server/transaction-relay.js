@@ -42,7 +42,7 @@ console.log("🌐 Jaringan:", config.networkId);
 // Endpoint pengecekan kesehatan
 app.get('/health', (req, res) => {
   res.json({
-    status: 'sehat',
+    status: 'healthy',
     contractAddress: config.contractAddress,
     senderAddress: wallet.address,
     networkId: config.networkId
