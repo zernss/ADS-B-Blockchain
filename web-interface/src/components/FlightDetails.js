@@ -25,7 +25,7 @@ const FlightDetails = ({ flight }) => {
           <Divider />
           <Box sx={{ display: 'flex', justifyContent: 'space-between', my: 1 }}>
             <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Country:</Typography>
-            <Typography variant="body1">{flight.origin_country || 'Unknown'}</Typography>
+            <Typography variant="body1">{flight.origin_country && flight.origin_country.trim() ? flight.origin_country : 'Unknown'}</Typography>
           </Box>
           <Divider />
           <Box sx={{ display: 'flex', justifyContent: 'space-between', my: 1 }}>
@@ -46,7 +46,7 @@ const FlightDetails = ({ flight }) => {
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
             <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Speed:</Typography>
             <Typography variant="body1">
-              {flight.velocity ? `${Math.round(flight.velocity * 3.6)} km/h` : 'N/A'}
+              {flight.velocity !== undefined && flight.velocity !== null ? `${Math.round(flight.velocity * 3.6)} km/h` : 'N/A'}
             </Typography>
           </Box>
         </Paper>

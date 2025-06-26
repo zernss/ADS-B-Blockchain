@@ -3,6 +3,7 @@ import { Box, Typography, Card, CardContent, Button, Alert, CircularProgress, Gr
 import { ethers } from 'ethers';
 import Map from './Map';
 import BlockchainLoggerComponent from './BlockchainLogger';
+import FlightDetails from './FlightDetails';
 import RelayBlockchainSystem from '../services/RelayBlockchainService';
 import { fetchFlightData } from '../services/OpenSkyService';
 import blockchainLogger from '../services/BlockchainLogger';
@@ -17,6 +18,7 @@ function RelayBlockchainPage() {
   const [updateStatus, setUpdateStatus] = useState('');
   const [activeTab, setActiveTab] = useState(0);
   const [connectionStatus, setConnectionStatus] = useState('connecting');
+  const [selectedFlight, setSelectedFlight] = useState(null);
 
   const readOnlyProvider = useMemo(() => {
     // This provider is only for reading blockchain state for the logger, not for sending transactions.
@@ -204,6 +206,7 @@ function RelayBlockchainPage() {
 
   const handleFlightSelect = (flight) => {
     console.log('Flight selected:', flight);
+    setSelectedFlight(flight);
     // You can add more functionality here, such as showing flight details in a modal
     // or highlighting the selected flight on the map
   };
@@ -389,6 +392,10 @@ function RelayBlockchainPage() {
                 <Map flights={flights} attackedFlights={attackedFlights} onFlightSelect={handleFlightSelect} />
               </CardContent>
             </Card>
+          </Grid>
+          
+          <Grid item xs={12} md={4}>
+            <FlightDetails flight={selectedFlight} />
           </Grid>
           
           <Grid item xs={12}>
