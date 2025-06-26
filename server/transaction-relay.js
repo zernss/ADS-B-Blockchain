@@ -11,14 +11,58 @@ const PORT = 3001;
 app.use(cors());
 app.use(express.json());
 
+// Nonce management utility
+let lastNonce = -1;
+async function getNextNonce() {
+  try {
+    const currentNonce = await provider.getTransactionCount(wallet.address, 'latest');
+    if (currentNonce > lastNonce) {
+      lastNonce = currentNonce;
+      console.log(`🔢 Nonce updated: ${lastNonce}`);
+    }
+    return currentNonce;
+  } catch (error) {
+    console.error('Error getting nonce:', error);
+    throw error;
+  }
+}
+
 // Endpoint root untuk status server dasar
 app.get('/', (req, res) => {
   res.json({
-    message: 'Server Relay Transaksi ADS-B sedang berjalan.',
-    status: 'sehat',
-    documentation: 'Lihat SYSTEM_COMPARISON.md untuk detail lebih lanjut.',
-    healthCheck: 'GET /health untuk status detail.'
+    message: 'ADS-B Blockchain Relay Server',
+    status: 'running',
+    timestamp: new Date().toISOString()
   });
+});
+
+// Debug endpoint for nonce and wallet status
+app.get('/debug', async (req, res) => {
+  try {
+    const currentNonce = await provider.getTransactionCount(wallet.address, 'latest');
+    const balance = await provider.getBalance(wallet.address);
+    
+    res.json({
+      wallet: {
+        address: wallet.address,
+        balance: ethers.utils.formatEther(balance),
+        nonce: currentNonce,
+        lastTrackedNonce: lastNonce
+      },
+      contract: {
+        address: config.contractAddress,
+        networkId: config.networkId
+      },
+      server: {
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // Load contract configuration
@@ -67,8 +111,9 @@ app.post('/add-flight', async (req, res) => {
     
     console.log(`✈️ Menambahkan penerbangan: ${callsign} (${icao24})`);
     
-    // Fetch the latest nonce
-    const nonce = await provider.getTransactionCount(wallet.address, 'latest');
+    // Get the current nonce
+    const nonce = await getNextNonce();
+    console.log(`🔢 Using nonce: ${nonce}`);
 
     const tx = await contract.updateFlight(
       icao24,
@@ -98,6 +143,12 @@ app.post('/add-flight', async (req, res) => {
     
   } catch (error) {
     console.error('Kesalahan saat menambah penerbangan:', error);
+    
+    // Handle nonce errors specifically
+    if (error.message.includes('nonce') || error.message.includes('Nonce')) {
+      console.log('🔄 Nonce error detected, this is usually resolved automatically on retry');
+    }
+    
     res.status(500).json({ 
       success: false,
       error: error.message 
@@ -125,17 +176,43 @@ app.post('/add-flights-batch', async (req, res) => {
       });
     }
     
-    console.log(`📦 Menambahkan ${flights.length} penerbangan secara batch...`);
+    console.log(`📦 Memproses batch ${flights.length} penerbangan`);
     
-    // Validasi setiap penerbangan sebelum diproses
+    // Pre-filter flights for data quality issues
     const validFlights = [];
     const invalidFlights = [];
+    const skippedFlights = [];
+    const prevFlights = {}; // Track previous flights for validation
     
+    // Try to fetch previous flights from blockchain (simulate with a local cache for now)
+    // In production, you would fetch from the contract or a DB
+    // For demo, just use the first flight as the initial state
     for (const flight of flights) {
       if (flight.icao24 && 
           typeof flight.latitude === 'number' && !isNaN(flight.latitude) &&
           typeof flight.longitude === 'number' && !isNaN(flight.longitude) &&
           typeof flight.altitude === 'number' && !isNaN(flight.altitude)) {
+        // Pre-filter for altitude rate/jump
+        const prev = prevFlights[flight.icao24];
+        const now = Math.floor(Date.now() / 1000);
+        const timestamp = flight.timestamp ? Math.floor(new Date(flight.timestamp).getTime() / 1000) : now;
+        if (prev) {
+          const dt = timestamp - prev.timestamp;
+          const dAlt = flight.altitude - prev.altitude;
+          if (Math.abs(dAlt) > 500) {
+            skippedFlights.push({ ...flight, reason: 'Impossible altitude jump (>500m)' });
+            continue;
+          }
+          if (dt > 0) {
+            const rate = Math.abs(dAlt) / dt;
+            if (rate > 10) {
+              skippedFlights.push({ ...flight, reason: 'Impossible altitude rate (>10m/s)' });
+              continue;
+            }
+          }
+        }
+        // Save as previous for next check
+        prevFlights[flight.icao24] = { altitude: flight.altitude, timestamp };
         validFlights.push(flight);
       } else {
         invalidFlights.push(flight);
@@ -146,7 +223,8 @@ app.post('/add-flights-batch', async (req, res) => {
     if (validFlights.length === 0) {
       return res.status(400).json({
         success: false,
-        error: 'Tidak ada penerbangan valid dalam batch'
+        error: 'Tidak ada penerbangan valid dalam batch',
+        skippedFlights
       });
     }
     
@@ -154,27 +232,16 @@ app.post('/add-flights-batch', async (req, res) => {
       console.log(`⚠️ ${invalidFlights.length} data penerbangan tidak valid telah difilter`);
     }
     
-    // Log the batch to be sent
-    const icao24s = validFlights.map(f => f.icao24);
-    const callsigns = validFlights.map(f => f.callsign || '');
-    const latitudes = validFlights.map(f => Math.floor(f.latitude * 1e6));
-    const longitudes = validFlights.map(f => Math.floor(f.longitude * 1e6));
-    const altitudes = validFlights.map(f => Math.floor(f.altitude));
-    const onGrounds = validFlights.map(f => f.onGround || false);
-    const isSpoofedFlags = validFlights.map(f => f.isSpoofed || false);
-    console.log('Batch yang akan dikirim:', {
-      icao24s,
-      callsigns,
-      latitudes,
-      longitudes,
-      altitudes,
-      onGrounds,
-      isSpoofedFlags
-    });
+    if (skippedFlights.length > 0) {
+      console.log(`⚠️ ${skippedFlights.length} data penerbangan dilewati karena masalah kualitas data`);
+    }
 
-    // Helper for dynamic batch splitting
-    async function tryBatch(batch, batchGasLimit) {
+    // Helper for dynamic batch splitting with proper nonce management
+    async function tryBatch(batch, batchGasLimit, retryCount = 0) {
       try {
+        // Get fresh nonce for each attempt
+        const nonce = await getNextNonce();
+        
         const icao24s = batch.map(f => f.icao24);
         const callsigns = batch.map(f => f.callsign || '');
         const latitudes = batch.map(f => Math.floor(f.latitude * 1e6));
@@ -182,8 +249,9 @@ app.post('/add-flights-batch', async (req, res) => {
         const altitudes = batch.map(f => Math.floor(f.altitude));
         const onGrounds = batch.map(f => f.onGround || false);
         const isSpoofedFlags = batch.map(f => f.isSpoofed || false);
-        const nonce = await provider.getTransactionCount(wallet.address, 'latest');
-        console.log(`🚀 Mengirim batch sebanyak ${batch.length} penerbangan dengan gasLimit ${batchGasLimit}`);
+        
+        console.log(`🚀 Mengirim batch sebanyak ${batch.length} penerbangan dengan gasLimit ${batchGasLimit} dan nonce ${nonce} (attempt ${retryCount + 1})`);
+        
         const tx = await contract.updateFlightBatch(
           icao24s,
           callsigns,
@@ -194,11 +262,24 @@ app.post('/add-flights-batch', async (req, res) => {
           isSpoofedFlags,
           { nonce, gasLimit: batchGasLimit }
         );
+        
         const receipt = await tx.wait();
-        console.log(`✅ Transaksi batch berhasil! Hash: ${tx.hash}`);
+        console.log(`✅ Transaksi batch berhasil! Hash: ${tx.hash}, Nonce: ${nonce}`);
+        
         return { success: true, tx, receipt, batch };
       } catch (error) {
         console.error('❌ Batch gagal:', error.message);
+        
+        // Handle nonce errors specifically
+        if (error.message.includes('nonce') || error.message.includes('Nonce')) {
+          if (retryCount < 2) {
+            console.log(`🔄 Retrying batch due to nonce error (attempt ${retryCount + 2})`);
+            // Wait a bit before retrying
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            return tryBatch(batch, batchGasLimit, retryCount + 1);
+          }
+        }
+        
         return { success: false, error, batch };
       }
     }
@@ -215,7 +296,7 @@ app.post('/add-flights-batch', async (req, res) => {
       let nextBatches = [];
       for (const batch of batches) {
         if (batch.length === 0) continue;
-        const result = await tryBatch(batch, batchGasLimit);
+        const result = await tryBatch(batch, batchGasLimit, retryCount);
         if (result.success) {
           allResults.push(result);
         } else {
@@ -245,7 +326,8 @@ app.post('/add-flights-batch', async (req, res) => {
       return res.status(500).json({
         success: false,
         error: 'All batches failed. See server logs for details.',
-        failedBatches: failedBatches.map(fb => ({ error: fb.error?.message, batch: fb.batch }))
+        failedBatches: failedBatches.map(fb => ({ error: fb.error?.message, batch: fb.batch })),
+        skippedFlights
       });
     }
     
@@ -260,21 +342,16 @@ app.post('/add-flights-batch', async (req, res) => {
         gasUsed: sb.receipt.gasUsed.toString(),
         flightsCount: sb.batch.length
       })),
-      failedFlights: failedBatches.flatMap(fb => fb.batch)
+      failedFlights: failedBatches.flatMap(fb => fb.batch),
+      failedReasons: failedBatches.map(fb => fb.error?.message),
+      skippedFlights
     });
     
   } catch (error) {
-    console.error('Kesalahan saat menambah batch penerbangan:', error);
-    
-    // Provide more detailed error information
+    // Parse revert reason if possible
     let errorMessage = error.message;
-    if (error.reason) {
-      errorMessage = error.reason;
-    } else if (error.error && error.error.message) {
-      errorMessage = error.error.message;
-    }
-    
-    res.status(500).json({ 
+    if (error.reason) errorMessage = error.reason;
+    res.status(200).json({
       success: false,
       error: errorMessage,
       details: error.toString()

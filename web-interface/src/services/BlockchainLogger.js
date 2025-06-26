@@ -61,15 +61,14 @@ class BlockchainLogger {
   formatLogEntry(level, message, data) {
     const timestamp = new Date().toLocaleTimeString();
     let formatted = `[${timestamp}] ${message}`;
-    
     if (data.transactionHash) {
       formatted += `\n  TX Hash: ${data.transactionHash}`;
     }
-    if (data.gasUsed) {
-      formatted += `\n  Gas Used: ${data.gasUsed.toString()}`;
-    }
     if (data.blockNumber) {
       formatted += `\n  Block: ${data.blockNumber}`;
+    }
+    if (data.gasUsed) {
+      formatted += `\n  Gas Used: ${data.gasUsed.toString()}`;
     }
     if (data.confirmations) {
       formatted += `\n  Confirmations: ${data.confirmations}`;
@@ -77,7 +76,14 @@ class BlockchainLogger {
     if (data.error) {
       formatted += `\n  Error: ${data.error.message || data.error}`;
     }
-    
+    // Add a clear block for transaction details if present
+    if (data.transactionHash || data.blockNumber || data.gasUsed) {
+      formatted += `\n-----------------------------\nTransaction Details:`;
+      if (data.transactionHash) formatted += `\n  Hash: ${data.transactionHash}`;
+      if (data.blockNumber) formatted += `\n  Block: ${data.blockNumber}`;
+      if (data.gasUsed) formatted += `\n  Gas Used: ${data.gasUsed}`;
+      formatted += `\n-----------------------------`;
+    }
     return formatted;
   }
 

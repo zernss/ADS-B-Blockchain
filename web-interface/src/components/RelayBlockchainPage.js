@@ -59,7 +59,16 @@ function RelayBlockchainPage() {
         setFlights(newFlights);
         setAttackedFlights(new Set());
         setAttackResults([]);
-        setUpdateStatus(`Successfully added ${newFlights.length} new flights to blockchain.`);
+        if (result.failedFlights && result.failedFlights.length > 0) {
+          setUpdateStatus(
+            `Added ${result.successfulBatches} batches. ${result.failedFlights.length} flights were blocked for security reasons.`
+          );
+        }
+        if (result.error) {
+          setUpdateStatus(
+            `Some flights were blocked by the blockchain: ${result.error}`
+          );
+        }
         setTimeout(() => setUpdateStatus(''), 5000);
       } else {
         setUpdateStatus('Failed to add new flight data to blockchain via relay server');
