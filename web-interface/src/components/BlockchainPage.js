@@ -159,7 +159,9 @@ function BlockchainPage() {
           reason: result.reason,
           transactionHash: result.transactionHash,
           attackedFlight: result.attackedFlight,
-          eventLogs: result.eventLogs
+          eventLogs: result.eventLogs,
+          original: result.targetFlight || targetFlight,
+          attacked: result.attackedFlight
         }, ...prev].slice(0, 10));
       } catch (err) {
         setError({ type: 'attack', message: `Failed to simulate ${attackType} attack. Error: ${err.message}` });
@@ -458,11 +460,11 @@ function BlockchainPage() {
                         <Box sx={{ display: 'flex', gap: 4 }}>
                           <Box>
                             <Typography variant="caption">Original</Typography>
-                            <pre style={{ fontSize: 12 }}>{JSON.stringify(result.targetFlight, null, 2)}</pre>
+                            <pre style={{ fontSize: 12 }}>{JSON.stringify(result.original, null, 2)}</pre>
                           </Box>
                           <Box>
                             <Typography variant="caption">Attacked</Typography>
-                            <pre style={{ fontSize: 12 }}>{JSON.stringify(result.attackedFlight, null, 2)}</pre>
+                            <pre style={{ fontSize: 12 }}>{JSON.stringify(result.attacked, null, 2)}</pre>
                           </Box>
                         </Box>
                       </Box>

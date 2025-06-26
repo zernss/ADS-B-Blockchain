@@ -61,7 +61,9 @@ function UnprotectedPage() {
         timestamp: new Date(),
         type: attackType,
         targetFlight: targetFlight.callsign,
-        detectedByTraditional: result.detectedByTraditional
+        detectedByTraditional: result.detectedByTraditional,
+        original: targetFlight,
+        attacked: result.attackedFlight
       }, ...prev].slice(0, 10));
     } catch (err) {
       setError(`Failed to simulate ${attackType} attack`);
