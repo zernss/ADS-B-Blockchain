@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ethers } from 'ethers';
-import { Box, Typography, Card, CardContent, Button, Alert, CircularProgress, Grid, Tabs, Tab, Paper } from '@mui/material';
+import { Box, Typography, Card, CardContent, Button, Alert, CircularProgress, Grid, Tabs, Tab, Paper, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import Map from './Map';
 import BlockchainInfo from './BlockchainInfo';
 import BlockchainLoggerComponent from './BlockchainLogger';
@@ -19,6 +19,9 @@ function BlockchainPage() {
   const [activeTab, setActiveTab] = useState(0);
   const [isConnected, setIsConnected] = useState(false);
   const [selectedFlight, setSelectedFlight] = useState(null);
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [confirmationData, setConfirmationData] = useState(null);
+  const [onConfirm, setOnConfirm] = useState(() => () => {});
 
   const handleFlightSelect = (flight) => {
     setSelectedFlight(flight);
@@ -105,13 +108,26 @@ function BlockchainPage() {
 
   const updateFlights = useCallback(async () => {
     if (!flightService) return;
-    try {
-      const newFlights = await flightService.updateFlightData();
-      setFlights(newFlights);
-    } catch (err) {
-      setError({ type: 'general', message: 'Failed to fetch flight data from OpenSky Network' });
-    }
-  }, [flightService]);
+    setConfirmationData({
+      type: 'update',
+      flights: flights
+    });
+    setOnConfirm(() => async () => {
+      try {
+        const newFlights = await flightService.updateFlightData();
+        if (newFlights && newFlights.length > 0) {
+          setFlights(newFlights);
+        } else {
+          setError({ type: 'general', message: 'Failed to update blockchain: No flights were written. Please check the contract logs for details.' });
+        }
+      } catch (err) {
+        setError({ type: 'general', message: `Failed to update blockchain: ${err.message}` });
+      } finally {
+        setConfirmationOpen(false);
+      }
+    });
+    setConfirmationOpen(true);
+  }, [flightService, flights]);
 
   useEffect(() => {
     return () => {
@@ -121,31 +137,37 @@ function BlockchainPage() {
 
   const simulateAttack = async (attackType) => {
     if (!flightService || flights.length === 0) return;
-    try {
-      const targetFlight = flights[Math.floor(Math.random() * flights.length)];
-      const result = await flightService.simulateAttack(attackType, targetFlight);
-
-      // If the attack succeeded, update the flight's status in the main flights array
-      if (!result.detectedByBlockchain) {
-        setFlights(prevFlights => prevFlights.map(f => 
-          f.icao24 === targetFlight.icao24 ? { ...f, isUnderAttack: true } : f
-        ));
+    const targetFlight = flights[Math.floor(Math.random() * flights.length)];
+    setConfirmationData({
+      type: 'attack',
+      attackType,
+      targetFlight
+    });
+    setOnConfirm(() => async () => {
+      try {
+        const result = await flightService.simulateAttack(attackType, targetFlight);
+        if (!result.detectedByBlockchain) {
+          setFlights(prevFlights => prevFlights.map(f => 
+            f.icao24 === targetFlight.icao24 ? { ...f, isUnderAttack: true } : f
+          ));
+        }
+        setAttackResults(prev => [{
+          timestamp: new Date(),
+          type: attackType,
+          targetFlight: result.targetFlight?.callsign || targetFlight.callsign,
+          detectedByBlockchain: result.detectedByBlockchain,
+          reason: result.reason,
+          transactionHash: result.transactionHash,
+          attackedFlight: result.attackedFlight,
+          eventLogs: result.eventLogs
+        }, ...prev].slice(0, 10));
+      } catch (err) {
+        setError({ type: 'attack', message: `Failed to simulate ${attackType} attack. Error: ${err.message}` });
+      } finally {
+        setConfirmationOpen(false);
       }
-      // Store all result fields for detailed UI
-      setAttackResults(prev => [{
-        timestamp: new Date(),
-        type: attackType,
-        targetFlight: result.targetFlight?.callsign || targetFlight.callsign,
-        detectedByBlockchain: result.detectedByBlockchain,
-        reason: result.reason,
-        transactionHash: result.transactionHash,
-        attackedFlight: result.attackedFlight,
-        eventLogs: result.eventLogs
-      }, ...prev].slice(0, 10));
-
-    } catch (err) {
-      setError({ type: 'attack', message: `Failed to simulate ${attackType} attack. Error: ${err.message}` });
-    }
+    });
+    setConfirmationOpen(true);
   };
 
   const handleTabChange = (event, newValue) => {
@@ -319,6 +341,41 @@ function BlockchainPage() {
 
   return (
     <Box>
+      <Dialog open={confirmationOpen} onClose={() => setConfirmationOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle>Confirm Blockchain Transaction</DialogTitle>
+        <DialogContent>
+          {confirmationData?.type === 'update' && (
+            <Box>
+              <Typography variant="subtitle1" gutterBottom>Flight Data to be Sent to Blockchain:</Typography>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                {confirmationData.flights && confirmationData.flights.length > 0
+                  ? `${confirmationData.flights.length} flights will be updated on the blockchain.`
+                  : 'No flight data available.'}
+              </Typography>
+              {confirmationData.flights && confirmationData.flights.length > 0 && (
+                <Box sx={{ maxHeight: 200, overflow: 'auto', mt: 1 }}>
+                  <pre style={{ fontSize: 12 }}>{JSON.stringify(confirmationData.flights.slice(0, 5), null, 2)}{confirmationData.flights.length > 5 ? '\n...and more' : ''}</pre>
+                </Box>
+              )}
+            </Box>
+          )}
+          {confirmationData?.type === 'attack' && (
+            <Box>
+              <Typography variant="subtitle1" gutterBottom>Attack Data to be Sent to Blockchain:</Typography>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                Attack Type: <b>{confirmationData.attackType}</b>
+              </Typography>
+              <Box sx={{ maxHeight: 200, overflow: 'auto', mt: 1 }}>
+                <pre style={{ fontSize: 12 }}>{JSON.stringify(confirmationData.targetFlight, null, 2)}</pre>
+              </Box>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmationOpen(false)} color="secondary">Cancel</Button>
+          <Button onClick={onConfirm} color="primary" variant="contained">Confirm &amp; Send</Button>
+        </DialogActions>
+      </Dialog>
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Paper>
@@ -338,7 +395,7 @@ function BlockchainPage() {
                   <Typography variant="h6">Flight Map (Blockchain Secured)</Typography>
                   <Box>
                     <Button variant="contained" onClick={updateFlights} sx={{ mr: 1 }}>Refresh Flight Data</Button>
-                    <Button variant="outlined" onClick={() => flightService?.getAllFlights().then(setFlights)}>Sync from Blockchain</Button>
+                    <Button variant="outlined" onClick={() => flightService?.getBlockchainSystem()?.getAllFlights().then(setFlights)}>Sync from Blockchain</Button>
                   </Box>
                 </Box>
               </CardContent>

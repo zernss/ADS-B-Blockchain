@@ -476,14 +476,29 @@ class FlightDataService {
         eventLogs: txResult?.eventLogs || []
       };
     } catch (error) {
-      blockchainLogger.log('error', 'Attack Prevented by Blockchain', { attackType, targetFlight, reason: error.message });
+      // Try to extract revert reason from ethers.js error object
+      let reason = error.message;
+      // ethers v5: error.error.data.message or error.data.message
+      if (error && error.error && error.error.data && error.error.data.message) {
+        reason = error.error.data.message;
+      } else if (error && error.data && error.data.message) {
+        reason = error.data.message;
+      } else if (error && error.reason) {
+        reason = error.reason;
+      }
+      // Try to extract revert reason string from message
+      const match = reason && reason.match(/reverted with reason string '([^']+)'/);
+      if (match && match[1]) {
+        reason = match[1];
+      }
+      blockchainLogger.log('error', 'Attack Prevented by Blockchain', { attackType, targetFlight, reason });
       return {
         attackType,
         targetFlight,
         attackedFlight,
         detectedByBlockchain: true,
-        reason: error.message,
-        message: 'Attack Prevented: The smart contract rejected the malicious transaction.',
+        reason,
+        message: `Attack Prevented: The smart contract rejected the malicious transaction. Reason: ${reason}`,
         eventLogs: error.eventLogs || []
       };
     }
