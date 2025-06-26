@@ -45,39 +45,21 @@ function RelayBlockchainPage() {
 
   const updateFlightData = useCallback(async (system, forceRefresh = false) => {
     if (!system) return;
-    
     try {
-      // First, load existing flights from the blockchain
-      setUpdateStatus('Loading existing flights from blockchain...');
-      const existingFlights = await system.getAllFlights();
-      console.log('Loaded existing flights from blockchain:', existingFlights.length);
-      
-      // Set existing flights to display on map
-      if (existingFlights && existingFlights.length > 0) {
-        setFlights(existingFlights);
-        setUpdateStatus(`Loaded ${existingFlights.length} existing flights from blockchain`);
-      }
-      
-      // Then fetch new flight data from OpenSky Network
       setUpdateStatus('Fetching new flight data from OpenSky Network...');
       const newFlights = await fetchFlightData(forceRefresh);
-      
       if (!newFlights || !Array.isArray(newFlights)) {
         setUpdateStatus('Failed to fetch flight data from OpenSky Network');
         return;
       }
-
       blockchainLogger.log('info', 'Received flight data from OpenSky Network', { count: newFlights.length });
-
-      // Add new flights to blockchain
       setUpdateStatus('Adding new flight data to blockchain via relay server...');
       const result = await system.addFlightDataBatch(newFlights);
-      
       if (result) {
-        // Combine existing and new flights for display
-        const combinedFlights = [...existingFlights, ...newFlights];
-        setFlights(combinedFlights);
-        setUpdateStatus(`Successfully added ${newFlights.length} new flights to blockchain. Total: ${combinedFlights.length} flights`);
+        setFlights(newFlights);
+        setAttackedFlights(new Set());
+        setAttackResults([]);
+        setUpdateStatus(`Successfully added ${newFlights.length} new flights to blockchain.`);
         setTimeout(() => setUpdateStatus(''), 5000);
       } else {
         setUpdateStatus('Failed to add new flight data to blockchain via relay server');
@@ -142,11 +124,9 @@ function RelayBlockchainPage() {
       });
       return;
     }
-
     try {
-      setError(null); // Clear any previous errors
+      setError(null);
       const targetFlight = flights[Math.floor(Math.random() * flights.length)];
-      // Ensure all required fields are present
       const safeTargetFlight = {
         icao24: targetFlight.icao24,
         callsign: targetFlight.callsign || targetFlight.icao24,
@@ -156,16 +136,13 @@ function RelayBlockchainPage() {
         onGround: typeof targetFlight.onGround === 'boolean' ? targetFlight.onGround : false,
         isSpoofed: typeof targetFlight.isSpoofed === 'boolean' ? targetFlight.isSpoofed : false
       };
-      // Log the attempt
-      console.log(`Attempting ${attackType} attack on flight ${safeTargetFlight.callsign}`);
-      console.log('safeTargetFlight sent to relay:', safeTargetFlight);
       const result = await relaySystem.simulateAttack(attackType, safeTargetFlight);
-      
       if (!result) {
         throw new Error('No response from relay server');
       }
-
-      setAttackedFlights(prev => new Set([...prev, targetFlight.icao24]));
+      if (!result.detectedByBlockchain) {
+        setAttackedFlights(prev => new Set([...prev, targetFlight.icao24]));
+      }
       setAttackResults(prev => [{
         timestamp: new Date(),
         type: attackType,
@@ -178,7 +155,6 @@ function RelayBlockchainPage() {
         original: result.targetFlight || targetFlight,
         attacked: result.attackedFlight
       }, ...prev].slice(0, 10));
-
     } catch (err) {
       console.error('Attack simulation error:', err);
       
