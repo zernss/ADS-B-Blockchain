@@ -35,10 +35,28 @@ const BlockchainActivityLogger = () => {
   const [filter, setFilter] = useState('all');
   const [autoScroll, setAutoScroll] = useState(true);
   const [stats, setStats] = useState({});
+  const [isUserScrolling, setIsUserScrolling] = useState(false);
   const logsEndRef = useRef(null);
+  const logsContainerRef = useRef(null);
 
   const scrollToBottom = () => {
-    logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (logsEndRef.current && autoScroll && !isUserScrolling) {
+      logsEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleScroll = () => {
+    if (!logsContainerRef.current) return;
+    
+    const { scrollTop, scrollHeight, clientHeight } = logsContainerRef.current;
+    const isAtBottom = scrollHeight - scrollTop - clientHeight < 10; // 10px threshold
+    
+    // If user is at bottom, allow auto-scroll
+    if (isAtBottom) {
+      setIsUserScrolling(false);
+    } else {
+      setIsUserScrolling(true);
+    }
   };
 
   useEffect(() => {
@@ -47,7 +65,8 @@ const BlockchainActivityLogger = () => {
       setLogs(blockchainLogs);
       setStats(blockchainLogger.getBlockchainActivityStats());
       
-      if (autoScroll) {
+      // Only auto-scroll if user is at bottom and auto-scroll is enabled
+      if (autoScroll && !isUserScrolling) {
         setTimeout(scrollToBottom, 100);
       }
     };
@@ -66,7 +85,7 @@ const BlockchainActivityLogger = () => {
       blockchainLogger.removeListener(listener);
       clearInterval(interval);
     };
-  }, [autoScroll]);
+  }, [autoScroll, isUserScrolling]);
 
   const getTypeIcon = (type) => {
     switch (type) {
@@ -105,6 +124,17 @@ const BlockchainActivityLogger = () => {
 
   const handleRefresh = () => {
     setLogs([...blockchainLogger.getBlockchainActivityLogs()]);
+  };
+
+  const handleAutoScrollToggle = () => {
+    setAutoScroll(!autoScroll);
+    // If turning on auto-scroll, scroll to bottom immediately
+    if (!autoScroll) {
+      setTimeout(() => {
+        setIsUserScrolling(false);
+        scrollToBottom();
+      }, 100);
+    }
   };
 
   const formatLogContent = (log) => {
@@ -216,14 +246,24 @@ const BlockchainActivityLogger = () => {
           <Button
             size="small"
             variant={autoScroll ? "contained" : "outlined"}
-            onClick={() => setAutoScroll(!autoScroll)}
+            onClick={handleAutoScrollToggle}
           >
             {autoScroll ? "Auto-scroll ON" : "Auto-scroll OFF"}
           </Button>
+          
+          {isUserScrolling && autoScroll && (
+            <Chip 
+              label="Scroll to bottom to resume auto-scroll" 
+              color="warning" 
+              size="small" 
+            />
+          )}
         </Box>
 
         {/* Logs Display */}
         <Paper 
+          ref={logsContainerRef}
+          onScroll={handleScroll}
           sx={{ 
             flexGrow: 1, 
             overflow: 'auto', 

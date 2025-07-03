@@ -486,12 +486,14 @@ class BlockchainLogger {
         formatted += `\n  🧱 Block #${data.blockNumber}`;
         break;
       case 'pending':
-        formatted += `\n  ⏳ TX: ${data.transactionHash?.substring(0, 10)}...`;
+        // Ensure transactionHash is a string before using substring
+        const txHash = data.transactionHash ? String(data.transactionHash) : '';
+        formatted += `\n  ⏳ TX: ${txHash.substring(0, 10)}...`;
         break;
       case 'event':
         formatted += `\n  📝 Event: ${data.eventName}`;
         if (data.transactionHash) {
-          formatted += `\n  🔗 TX: ${data.transactionHash}`;
+          formatted += `\n  🔗 TX: ${String(data.transactionHash)}`;
         }
         if (data.blockNumber) {
           formatted += `\n  🧱 Block: ${data.blockNumber}`;
@@ -503,11 +505,11 @@ class BlockchainLogger {
       case 'rejection':
         formatted += `\n  ❌ Reason: ${data.reason}`;
         if (data.transactionHash) {
-          formatted += `\n  🔗 TX: ${data.transactionHash}`;
+          formatted += `\n  🔗 TX: ${String(data.transactionHash)}`;
         }
         break;
       case 'transaction':
-        formatted += `\n  🔗 Hash: ${data.transactionHash}`;
+        formatted += `\n  🔗 Hash: ${String(data.transactionHash)}`;
         if (data.blockNumber) {
           formatted += `\n  🧱 Block: ${data.blockNumber}`;
         }
@@ -531,7 +533,7 @@ class BlockchainLogger {
     if (data.transactionHash || data.blockNumber || data.gasUsed) {
       formatted += `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
       formatted += `\n🔗 BLOCKCHAIN DETAILS:`;
-      if (data.transactionHash) formatted += `\n  Hash: ${data.transactionHash}`;
+      if (data.transactionHash) formatted += `\n  Hash: ${String(data.transactionHash)}`;
       if (data.blockNumber) formatted += `\n  Block: ${data.blockNumber}`;
       if (data.gasUsed) formatted += `\n  Gas Used: ${data.gasUsed}`;
       if (data.gasPrice) formatted += `\n  Gas Price: ${data.gasPrice}`;
