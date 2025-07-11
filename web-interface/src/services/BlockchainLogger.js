@@ -15,7 +15,18 @@ class BlockchainLogger {
       gasPrice: null,
       lastUpdate: null
     };
-    this.blockchainActivityLogs = []; // New dedicated blockchain activity logs
+    // Load blockchain activity logs from localStorage if available
+    const savedLogs = localStorage.getItem('blockchainActivityLogs');
+    if (savedLogs) {
+      const parsedLogs = JSON.parse(savedLogs);
+      // Convert string timestamps back to Date objects
+      this.blockchainActivityLogs = parsedLogs.map(log => ({
+        ...log,
+        timestamp: typeof log.timestamp === 'string' ? new Date(log.timestamp) : log.timestamp
+      }));
+    } else {
+      this.blockchainActivityLogs = [];
+    }
     this.maxBlockchainLogs = 500;
   }
 
@@ -468,6 +479,9 @@ class BlockchainLogger {
       this.blockchainActivityLogs = this.blockchainActivityLogs.slice(0, this.maxBlockchainLogs);
     }
 
+    // Persist logs to localStorage
+    localStorage.setItem('blockchainActivityLogs', JSON.stringify(this.blockchainActivityLogs));
+
     // Notify listeners
     this.notifyListeners();
     
@@ -573,9 +587,10 @@ class BlockchainLogger {
     return this.blockchainActivityLogs;
   }
 
-  // Clear blockchain activity logs
+  // Clear blockchain activity logs (manual reset, e.g., when node server is reset)
   clearBlockchainActivityLogs() {
     this.blockchainActivityLogs = [];
+    localStorage.removeItem('blockchainActivityLogs');
     this.notifyListeners();
   }
 
