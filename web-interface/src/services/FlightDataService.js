@@ -315,77 +315,25 @@ class BlockchainSystem {
   }
 
   async addFlightDataWithDetails(flight) {
-    if (!this.contract) {
-      blockchainLogger.log('error', 'Cannot add flight data: Contract not available');
-      return null;
-    }
-    try {
-      blockchainLogger.log('info', 'Adding flight data to blockchain', {
-        icao24: flight.icao24,
-        callsign: flight.callsign,
-        latitude: flight.latitude,
-        longitude: flight.longitude,
-        altitude: flight.altitude
-      });
-      const tx = await this.contract.updateFlight(
-        flight.icao24,
-        flight.callsign || '',
-        Math.floor(flight.latitude * 1e6),
-        Math.floor(flight.longitude * 1e6),
-        Math.floor(flight.altitude),
-        flight.onGround || false,
-        flight.isSpoofed || false
-      );
-      blockchainLogger.log('transaction', 'Flight data transaction submitted', {
-        transactionHash: tx.hash,
-        icao24: flight.icao24
-      });
-      const receipt = await tx.wait();
-      blockchainLogger.log('success', 'Flight data added to blockchain successfully', {
-        transactionHash: tx.hash,
-        blockNumber: receipt.blockNumber,
-        gasUsed: receipt.gasUsed.toString(),
-        icao24: flight.icao24
-      });
-      // Parse event logs
-      const eventLogs = [];
-      if (receipt && receipt.logs && receipt.logs.length > 0) {
-        for (const log of receipt.logs) {
-          try {
-            const parsed = this.contract.interface.parseLog(log);
-            eventLogs.push({
-              name: parsed.name,
-              values: parsed.args
-            });
-          } catch (e) {
-            // Not a contract event we care about
-          }
-        }
-      }
-      return {
-        transactionHash: tx.hash,
-        blockNumber: receipt.blockNumber,
-        eventLogs
-      };
-    } catch (error) {
-      blockchainLogger.log('error', 'Failed to add flight data to blockchain', {
-        icao24: flight.icao24,
-        error: error.message
-      });
-      error.eventLogs = [];
-      if (error.receipt && error.receipt.logs && error.receipt.logs.length > 0) {
-        for (const log of error.receipt.logs) {
-          try {
-            const parsed = this.contract.interface.parseLog(log);
-            error.eventLogs.push({
-              name: parsed.name,
-              values: parsed.args
-            });
-          } catch (e) {}
-        }
-      }
-      throw error;
-    }
+    if (!this.contract) return null;
+
+    const tx = await this.contract.updateFlight(
+      flight.icao24,
+      flight.callsign,
+      Math.floor(flight.latitude * 1e6),
+      Math.floor(flight.longitude * 1e6),
+      Math.floor(flight.altitude),
+      flight.onGround,
+      flight.isSpoofed
+    );
+
+    const receipt = await tx.wait();
+
+    return {
+      transactionHash: tx.hash,
+      blockNumber: receipt.blockNumber,
+      eventLogs: receipt.events || []
+    };
   }
 }
 
@@ -429,7 +377,13 @@ class FlightDataService {
       
       // Add data to both systems
       if (this.blockchainSystem) {
-        await this.blockchainSystem.addFlightDataBatch(flights);
+        // Filter flights that would violate smart contract validation
+        const validFlights = await this.filterValidFlights(flights);
+        if (validFlights.length > 0) {
+          await this.blockchainSystem.addFlightDataBatch(validFlights);
+        } else {
+          blockchainLogger.log('warning', 'No flights passed smart contract validation');
+        }
       }
       for (const flight of flights) {
         await this.traditionalSystem.addFlightData(flight);
@@ -446,6 +400,109 @@ class FlightDataService {
     } finally {
       this.isUpdating = false;
     }
+  }
+
+  async filterValidFlights(flights) {
+    if (!this.blockchainSystem || !this.blockchainSystem.contract) {
+      return flights; // If no blockchain system, return all flights
+    }
+
+    const validFlights = [];
+    const currentTime = Math.floor(Date.now() / 1000); // Current timestamp in seconds
+
+    // Fetch all existing flights from blockchain once and create a lookup map
+    const existingFlights = await this.blockchainSystem.getAllFlights();
+    const existingFlightsMap = new Map();
+    existingFlights.forEach(flight => {
+      existingFlightsMap.set(flight.icao24, flight);
+    });
+
+    blockchainLogger.log('info', 'Fetched existing flights for validation', {
+      existingFlightsCount: existingFlights.length,
+      newFlightsCount: flights.length
+    });
+
+    for (const flight of flights) {
+      try {
+        const prevFlight = existingFlightsMap.get(flight.icao24);
+        
+        if (!prevFlight) {
+          // First time seeing this flight, it's valid
+          validFlights.push(flight);
+          continue;
+        }
+
+        // Check timestamp validation (replay attack prevention)
+        const prevTimestamp = Math.floor(prevFlight.timestamp.getTime() / 1000);
+        if (currentTime <= prevTimestamp) {
+          blockchainLogger.log('warning', 'Flight rejected: timestamp not newer', {
+            icao24: flight.icao24,
+            currentTime,
+            prevTimestamp
+          });
+          continue;
+        }
+
+        // Check altitude rate validation
+        const timeDiff = currentTime - prevTimestamp;
+        if (timeDiff > 0) {
+          const altitudeDiff = Math.abs(flight.altitude - prevFlight.altitude);
+          const altitudeRate = altitudeDiff / timeDiff;
+          
+          // Smart contract allows max 10 m/s altitude rate
+          if (altitudeRate > 10) {
+            blockchainLogger.log('warning', 'Flight rejected: altitude rate too high', {
+              icao24: flight.icao24,
+              altitudeRate: altitudeRate.toFixed(2),
+              altitudeDiff,
+              timeDiff
+            });
+            continue;
+          }
+
+          // Check altitude jump validation (max 500m regardless of time)
+          if (altitudeDiff > 500) {
+            blockchainLogger.log('warning', 'Flight rejected: altitude jump too large', {
+              icao24: flight.icao24,
+              altitudeDiff
+            });
+            continue;
+          }
+
+          // Check position jump validation (spoofing prevention)
+          const latDiff = Math.abs(flight.latitude - prevFlight.latitude);
+          const lonDiff = Math.abs(flight.longitude - prevFlight.longitude);
+          const distMeters = (latDiff * 111000) + (lonDiff * 85000); // Approximate distance
+          
+          if (distMeters > 100000 && timeDiff < 300) {
+            blockchainLogger.log('warning', 'Flight rejected: position jump too large', {
+              icao24: flight.icao24,
+              distMeters: Math.round(distMeters),
+              timeDiff
+            });
+            continue;
+          }
+        }
+
+        // Flight passed all validations
+        validFlights.push(flight);
+      } catch (error) {
+        blockchainLogger.log('error', 'Error validating flight', {
+          icao24: flight.icao24,
+          error: error.message
+        });
+        // If we can't validate, skip this flight to be safe
+        continue;
+      }
+    }
+
+    blockchainLogger.log('info', 'Flight validation complete', {
+      totalFlights: flights.length,
+      validFlights: validFlights.length,
+      rejectedFlights: flights.length - validFlights.length
+    });
+
+    return validFlights;
   }
 
   async simulateAttack(attackType, targetFlight) {
@@ -541,7 +598,7 @@ class FlightDataService {
         }
       });
 
-      // Log attack data being submitted
+      // Log attack data being submitted (do NOT include hash here)
       blockchainLogger.logBlockchainActivity('transaction', `Attack Data Submission: ${attackType}`, {
         attackType: attackType,
         targetFlight: targetFlight.icao24,
@@ -555,69 +612,45 @@ class FlightDataService {
 
       // Actually try to submit the malicious data to blockchain
       const txResult = await this.blockchainSystem.addFlightDataWithDetails(attackedFlight);
-      
+
+      // Now log the transaction hash after it is available
+      if (txResult && txResult.transactionHash) {
+        blockchainLogger.logBlockchainActivity('transaction', `Attack Transaction Sent: ${attackType}`, {
+          attackType: attackType,
+          targetFlight: targetFlight.icao24,
+          transactionHash: txResult.transactionHash,
+          blockNumber: txResult.blockNumber
+        });
+      }
+
+      // Now log the attack succeeded event (with hash and block number)
       blockchainLogger.logBlockchainActivity('event', `Attack Succeeded: ${attackType}`, {
         attackType: attackType,
         targetFlight: targetFlight.icao24,
-        transactionHash: txResult?.transactionHash,
-        blockNumber: txResult?.blockNumber
+        transactionHash: txResult && txResult.transactionHash ? txResult.transactionHash : 'N/A',
+        blockNumber: txResult && txResult.blockNumber ? txResult.blockNumber : 'N/A'
       });
       
-      blockchainLogger.log('success', 'Attack simulation: Data accepted by blockchain', { attackType, targetFlight });
       return {
         attackType,
         targetFlight,
         attackedFlight,
-        transactionHash: txResult?.transactionHash,
-        blockNumber: txResult?.blockNumber,
         detectedByBlockchain: false,
-        message: 'Attack Succeeded: The malicious data was accepted by the blockchain.',
-        eventLogs: txResult?.eventLogs || []
+        transactionHash: txResult && txResult.transactionHash ? txResult.transactionHash : 'N/A',
+        blockNumber: txResult && txResult.blockNumber ? txResult.blockNumber : 'N/A',
+        message: `Attack Succeeded: ${attackType}`,
+        eventLogs: txResult && txResult.eventLogs ? txResult.eventLogs : []
       };
     } catch (error) {
-      // Try to extract revert reason from ethers.js error object
-      let reason = error.message;
-      // ethers v5: error.error.data.message or error.data.message
-      if (error && error.error && error.error.data && error.error.data.message) {
-        reason = error.error.data.message;
-      } else if (error && error.data && error.data.message) {
-        reason = error.data.message;
-      } else if (error && error.reason) {
-        reason = error.reason;
-      }
-      // Try to extract revert reason string from message
-      const match = reason && reason.match(/reverted with reason string '([^']+)'/);
-      if (match && match[1]) {
-        reason = match[1];
-      }
-      
-      blockchainLogger.logBlockchainActivity('rejection', `Attack Blocked by Smart Contract: ${attackType}`, {
-        attackType: attackType,
-        targetFlight: targetFlight.icao24,
-        reason: reason,
-        errorMessage: error.message
-      });
-      
-      blockchainLogger.log('error', 'Attack Prevented by Blockchain', { attackType, targetFlight, reason });
+      blockchainLogger.log('error', `Attack Blocked by Smart Contract: ${attackType}`, { error: error.message });
       return {
-        attackType,
-        targetFlight,
-        attackedFlight,
         detectedByBlockchain: true,
-        reason,
-        message: `Attack Prevented: The smart contract rejected the malicious transaction. Reason: ${reason}`,
-        eventLogs: error.eventLogs || []
+        reason: error && error.message ? error.message : 'Unknown error',
+        transactionHash: 'N/A',
+        blockNumber: 'N/A'
       };
     }
   }
-
-  getTraditionalSystem() {
-    return this.traditionalSystem;
-  }
-
-  getBlockchainSystem() {
-    return this.blockchainSystem;
-  }
 }
 
-export default FlightDataService; 
+export default FlightDataService;

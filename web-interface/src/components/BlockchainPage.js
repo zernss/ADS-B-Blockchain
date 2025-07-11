@@ -24,6 +24,7 @@ function BlockchainPage() {
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [confirmationData, setConfirmationData] = useState(null);
   const [onConfirm, setOnConfirm] = useState(() => () => {});
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const handleFlightSelect = (flight) => {
     setSelectedFlight(flight);
@@ -120,16 +121,44 @@ function BlockchainPage() {
     });
     setOnConfirm(() => async () => {
       try {
+        setConfirmationOpen(false);
+        setIsUpdating(true);
+        // Show loading state
+        setError(null);
+        
+        // Show validation in progress message
+        setError({ 
+          type: 'info', 
+          message: 'Validating flight data against smart contract rules...' 
+        });
+        
         const newFlights = await flightService.updateFlightData();
+        
+        // Clear validation message
+        setError(null);
+        
         if (newFlights && newFlights.length > 0) {
           setFlights(newFlights);
+          // Show success message
+          setError({ 
+            type: 'success', 
+            message: `Successfully processed ${newFlights.length} flights from OpenSky Network. Some flights may have been filtered out due to smart contract validation rules.` 
+          });
+          // Clear success message after 5 seconds
+          setTimeout(() => setError(null), 5000);
         } else {
-          setError({ type: 'general', message: 'Failed to update blockchain: No flights were written. Please check the contract logs for details.' });
+          setError({ 
+            type: 'general', 
+            message: 'No new flight data was processed. This could be due to OpenSky Network rate limits or all flights being filtered out by smart contract validation.' 
+          });
         }
       } catch (err) {
-        setError({ type: 'general', message: `Failed to update blockchain: ${err.message}` });
+        setError({ 
+          type: 'general', 
+          message: `Failed to update blockchain: ${err.message}. This could be due to network issues or smart contract validation failures.` 
+        });
       } finally {
-        setConfirmationOpen(false);
+        setIsUpdating(false);
       }
     });
     setConfirmationOpen(true);
@@ -212,6 +241,15 @@ function BlockchainPage() {
 
   const renderError = (error) => {
     if (!error) return null;
+
+    // Handle success messages
+    if (error.type === 'success') {
+      return (
+        <Alert severity="success" sx={{ mb: 2 }}>
+          {error.message}
+        </Alert>
+      );
+    }
 
     const getErrorContent = () => {
       switch (error.type) {
@@ -306,11 +344,11 @@ function BlockchainPage() {
         
         default:
           return {
-            title: 'Connection Error',
+            title: 'Error',
             content: (
               <Box>
                 <Typography variant="body1" gutterBottom>
-                  {error.message}
+                  {error.message || 'An unexpected error occurred.'}
                 </Typography>
                 <Button 
                   variant="contained" 
@@ -343,12 +381,24 @@ function BlockchainPage() {
     return <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh"><CircularProgress /></Box>;
   }
   
-  if (error) {
+  // Only show full error page for connection errors, not for update messages
+  if (error && (error.type === 'metamask-missing' || error.type === 'metamask-rejected' || error.type === 'wrong-network' || error.type === 'contract-error')) {
     return renderError(error);
   }
 
   return (
     <Box>
+      {/* Show success/error messages inline */}
+      {error && (error.type === 'success' || error.type === 'general' || error.type === 'info') && (
+        <Alert 
+          severity={error.type === 'success' ? 'success' : error.type === 'info' ? 'info' : 'error'} 
+          sx={{ mb: 2 }}
+          onClose={() => setError(null)}
+        >
+          {error.message}
+        </Alert>
+      )}
+
       <Dialog open={confirmationOpen} onClose={() => setConfirmationOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle>Confirm Blockchain Transaction</DialogTitle>
         <DialogContent>
@@ -357,14 +407,20 @@ function BlockchainPage() {
               <Typography variant="subtitle1" gutterBottom>Flight Data to be Sent to Blockchain:</Typography>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 {confirmationData.flights && confirmationData.flights.length > 0
-                  ? `${confirmationData.flights.length} flights will be updated on the blockchain.`
+                  ? `${confirmationData.flights.length} flights will be fetched from OpenSky Network and validated against smart contract rules before being sent to the blockchain.`
                   : 'No flight data available.'}
               </Typography>
-              {confirmationData.flights && confirmationData.flights.length > 0 && (
-                <Box sx={{ maxHeight: 200, overflow: 'auto', mt: 1 }}>
-                  <pre style={{ fontSize: 12 }}>{JSON.stringify(confirmationData.flights.slice(0, 5), null, 2)}{confirmationData.flights.length > 5 ? '\n...and more' : ''}</pre>
-                </Box>
-              )}
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontStyle: 'italic' }}>
+                Note: Some flights may be filtered out if they violate security rules (e.g., altitude changes > 10 m/s, position jumps > 100km in 5 minutes).
+              </Typography>
+              <Alert severity="info" sx={{ mt: 2 }}>
+                <Typography variant="body2">
+                  <strong>Process:</strong> After clicking "Confirm & Send", the system will:
+                  <br/>1. Fetch flight data from OpenSky Network
+                  <br/>2. Validate against existing blockchain data (this may take a few seconds)
+                  <br/>3. MetaMask will prompt you to approve the transaction
+                </Typography>
+              </Alert>
             </Box>
           )}
           {confirmationData?.type === 'attack' && (
@@ -376,6 +432,12 @@ function BlockchainPage() {
               <Box sx={{ maxHeight: 200, overflow: 'auto', mt: 1 }}>
                 <pre style={{ fontSize: 12 }}>{JSON.stringify(confirmationData.targetFlight, null, 2)}</pre>
               </Box>
+              <Alert severity="warning" sx={{ mt: 2 }}>
+                <Typography variant="body2">
+                  <strong>MetaMask Transaction:</strong> This will attempt to submit malicious data to test the blockchain's security. 
+                  MetaMask will prompt you to approve the transaction.
+                </Typography>
+              </Alert>
             </Box>
           )}
         </DialogContent>
@@ -403,7 +465,9 @@ function BlockchainPage() {
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography variant="h6">Flight Map (Blockchain Secured)</Typography>
                   <Box>
-                    <Button variant="contained" onClick={updateFlights} sx={{ mr: 1 }}>Refresh Flight Data</Button>
+                    <Button variant="contained" onClick={updateFlights} sx={{ mr: 1 }} disabled={isUpdating}>
+                      {isUpdating ? <CircularProgress size={24} /> : 'Refresh Flight Data'}
+                    </Button>
                     <Button variant="outlined" onClick={() => flightService?.getBlockchainSystem()?.getAllFlights().then(setFlights)}>Sync from Blockchain</Button>
                   </Box>
                 </Box>
