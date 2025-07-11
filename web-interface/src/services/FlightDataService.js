@@ -598,22 +598,10 @@ class FlightDataService {
         }
       });
 
-      // Log attack data being submitted (do NOT include hash here)
-      blockchainLogger.logBlockchainActivity('transaction', `Attack Data Submission: ${attackType}`, {
-        attackType: attackType,
-        targetFlight: targetFlight.icao24,
-        originalLatitude: targetFlight.latitude,
-        originalLongitude: targetFlight.longitude,
-        originalAltitude: targetFlight.altitude,
-        modifiedLatitude: attackedFlight.latitude,
-        modifiedLongitude: attackedFlight.longitude,
-        modifiedAltitude: attackedFlight.altitude
-      });
-
-      // Actually try to submit the malicious data to blockchain
+      // Remove the initial log for 'Attack Data Submission' to avoid duplicate transaction logs
+      // Only log the transaction after the hash is available
       const txResult = await this.blockchainSystem.addFlightDataWithDetails(attackedFlight);
 
-      // Now log the transaction hash after it is available
       if (txResult && txResult.transactionHash) {
         blockchainLogger.logBlockchainActivity('transaction', `Attack Transaction Sent: ${attackType}`, {
           attackType: attackType,
