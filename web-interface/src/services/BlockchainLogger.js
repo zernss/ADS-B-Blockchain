@@ -478,6 +478,13 @@ class BlockchainLogger {
   // Log blockchain-specific activities
   logBlockchainActivity(type, message, data = {}) {
     const timestamp = new Date();
+    // Prevent duplicate block logs
+    if (type === 'block' && this.blockchainActivityLogs.length > 0) {
+      const lastLog = this.blockchainActivityLogs[0];
+      if (lastLog.type === 'block' && lastLog.data && lastLog.data.blockNumber === data.blockNumber) {
+        return; // Skip duplicate block log
+      }
+    }
     const logEntry = {
       id: Date.now() + Math.random(),
       timestamp,
@@ -489,13 +496,22 @@ class BlockchainLogger {
 
     this.blockchainActivityLogs.unshift(logEntry);
     
-    // Keep only the latest logs
-    if (this.blockchainActivityLogs.length > this.maxBlockchainLogs) {
-      this.blockchainActivityLogs = this.blockchainActivityLogs.slice(0, this.maxBlockchainLogs);
-    }
+    // Remove the 500-entry limit: do not slice the array
+    // if (this.blockchainActivityLogs.length > this.maxBlockchainLogs) {
+    //   this.blockchainActivityLogs = this.blockchainActivityLogs.slice(0, this.maxBlockchainLogs);
+    // }
 
     // Persist logs to localStorage
-    localStorage.setItem('blockchainActivityLogs', JSON.stringify(this.blockchainActivityLogs));
+    try {
+      localStorage.setItem('blockchainActivityLogs', JSON.stringify(this.blockchainActivityLogs));
+    } catch (e) {
+      if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+        // If quota exceeded, stop persisting but keep in-memory logs
+        console.warn('LocalStorage quota exceeded: blockchainActivityLogs will not be persisted.');
+      } else {
+        throw e;
+      }
+    }
 
     // Notify listeners
     this.notifyListeners();
@@ -658,13 +674,40 @@ class BlockchainLogger {
     const stats = {
       totalLogs: this.blockchainActivityLogs.length,
       byType: {},
-      recentActivity: this.blockchainActivityLogs.slice(0, 10)
+      recentActivity: this.blockchainActivityLogs.slice(0, 10),
+      latestBlockNumber: null,
+      attackStats: {
+        DataSpoofingAttack: 0,
+        DataTamperingAttack: 0,
+        ReplayAttack: 0,
+        succeeded: 0,
+        rejected: 0
+      },
+      transactionCount: 0
     };
+
+    let maxBlock = null;
 
     this.blockchainActivityLogs.forEach(log => {
       stats.byType[log.type] = (stats.byType[log.type] || 0) + 1;
+      if (log.type === 'transaction') stats.transactionCount++;
+      // Track latest block number
+      if (log.data && log.data.blockNumber) {
+        const blockNum = parseInt(log.data.blockNumber);
+        if (!isNaN(blockNum) && (maxBlock === null || blockNum > maxBlock)) {
+          maxBlock = blockNum;
+        }
+      }
+      // Attack statistics
+      if (log.message && typeof log.message === 'string') {
+        if (log.message.includes('DataSpoofingAttack')) stats.attackStats.DataSpoofingAttack++;
+        if (log.message.includes('DataTamperingAttack')) stats.attackStats.DataTamperingAttack++;
+        if (log.message.includes('ReplayAttack')) stats.attackStats.ReplayAttack++;
+        if (log.type === 'event' && log.message.includes('Attack Succeeded')) stats.attackStats.succeeded++;
+        if ((log.type === 'rejection' || log.type === 'error') && (log.message.includes('Attack Prevented') || log.message.includes('Blocked'))) stats.attackStats.rejected++;
+      }
     });
-
+    stats.latestBlockNumber = maxBlock;
     return stats;
   }
 }

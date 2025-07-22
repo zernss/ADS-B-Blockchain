@@ -33,6 +33,48 @@ import {
 } from '@mui/icons-material';
 import blockchainLogger from '../services/BlockchainLogger';
 
+// ActivityStatistics component
+const ActivityStatistics = ({ stats }) => {
+  const attackStats = stats.attackStats || {
+    DataSpoofingAttack: 0,
+    DataTamperingAttack: 0,
+    ReplayAttack: 0,
+    succeeded: 0,
+    rejected: 0
+  };
+  return (
+    <Card sx={{ mb: 2 }}>
+      <CardContent>
+        <Typography variant="h6" gutterBottom>Activity Statistics</Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={3}>
+            <Typography variant="subtitle2">Total Activities</Typography>
+            <Typography variant="h5">{stats.totalLogs}</Typography>
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <Typography variant="subtitle2">Transactions</Typography>
+            <Typography variant="h5">{stats.transactionCount ?? 0}</Typography>
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <Typography variant="subtitle2">Latest Block Number</Typography>
+            <Typography variant="h5">{stats.latestBlockNumber ?? '-'}</Typography>
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <Typography variant="subtitle2">Attack Statistics</Typography>
+            <Box>
+              <Typography variant="body2">Data Spoofing: {attackStats.DataSpoofingAttack}</Typography>
+              <Typography variant="body2">Data Tampering: {attackStats.DataTamperingAttack}</Typography>
+              <Typography variant="body2">Replay: {attackStats.ReplayAttack}</Typography>
+              <Typography variant="body2" color="success.main">Succeeded: {attackStats.succeeded}</Typography>
+              <Typography variant="body2" color="error.main">Rejected: {attackStats.rejected}</Typography>
+            </Box>
+          </Grid>
+        </Grid>
+      </CardContent>
+    </Card>
+  );
+};
+
 const BlockchainActivityLogger = () => {
   const [logs, setLogs] = useState([]);
   const [filter, setFilter] = useState('all');
@@ -351,9 +393,6 @@ const BlockchainActivityLogger = () => {
           {/* Footer */}
           <Box sx={{ mt: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="caption" color="text.secondary">
-              Total: {filteredLogs.length} activities
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
               Real-time blockchain monitoring active
             </Typography>
           </Box>
@@ -370,6 +409,9 @@ const BlockchainActivityLogger = () => {
           <Card 
             sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}
           >
+            <Box sx={{ p: 2 }}>
+              <ActivityStatistics stats={stats} />
+            </Box>
             <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Typography variant="h6" gutterBottom>
@@ -507,9 +549,6 @@ const BlockchainActivityLogger = () => {
 
               {/* Footer */}
               <Box sx={{ mt: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="caption" color="text.secondary">
-                  Total: {filteredLogs.length} activities
-                </Typography>
                 <Typography variant="caption" color="text.secondary">
                   Real-time blockchain monitoring active
                 </Typography>
