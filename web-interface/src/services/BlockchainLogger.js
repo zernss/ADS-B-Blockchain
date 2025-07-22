@@ -394,20 +394,35 @@ class BlockchainLogger {
     if (!this.provider) return;
 
     // Monitor new blocks
-    this.provider.on('block', (blockNumber) => {
-      this.logBlockchainActivity('block', 'New Block Mined', {
-        blockNumber: blockNumber.toString(),
-        timestamp: new Date().toISOString()
-      });
+    this.provider.on('block', async (blockNumber) => {
+      try {
+        const block = await this.provider.getBlock(blockNumber);
+        let latestTxHash = '';
+        if (block.transactions && block.transactions.length > 0) {
+          latestTxHash = block.transactions[block.transactions.length - 1];
+        }
+        this.logBlockchainActivity('block', 'New Block Mined', {
+          blockNumber: blockNumber.toString(),
+          tx: latestTxHash,
+          timestamp: new Date().toISOString()
+        });
+      } catch (err) {
+        this.logBlockchainActivity('block', 'New Block Mined', {
+          blockNumber: blockNumber.toString(),
+          tx: '',
+          timestamp: new Date().toISOString(),
+          error: err.message
+        });
+      }
     });
 
-    // Monitor pending transactions
-    this.provider.on('pending', (txHash) => {
-      this.logBlockchainActivity('pending', 'Pending Transaction', {
-        transactionHash: txHash,
-        timestamp: new Date().toISOString()
-      });
-    });
+    // Remove pending transaction monitoring
+    // this.provider.on('pending', (txHash) => {
+    //   this.logBlockchainActivity('pending', 'Pending Transaction', {
+    //     transactionHash: txHash,
+    //     timestamp: new Date().toISOString()
+    //   });
+    // });
 
     // Monitor contract events if contract is available
     if (this.contract) {
@@ -501,13 +516,28 @@ class BlockchainLogger {
         break;
       case 'pending':
         // Ensure transactionHash is a string before using substring
-        const txHash = data.transactionHash ? String(data.transactionHash) : '';
+        let txHash = data.transactionHash;
+        if (typeof txHash !== 'string') {
+          try {
+            txHash = JSON.stringify(txHash);
+          } catch {
+            txHash = 'Invalid Hash';
+          }
+        }
         formatted += `\n  ⏳ TX: ${txHash.substring(0, 10)}...`;
         break;
       case 'event':
         formatted += `\n  📝 Event: ${data.eventName}`;
         if (data.transactionHash) {
-          formatted += `\n  🔗 TX: ${String(data.transactionHash)}`;
+          let txHashStr = data.transactionHash;
+          if (typeof txHashStr !== 'string') {
+            try {
+              txHashStr = JSON.stringify(txHashStr);
+            } catch {
+              txHashStr = 'Invalid Hash';
+            }
+          }
+          formatted += `\n  🔗 TX: ${txHashStr}`;
         }
         if (data.blockNumber) {
           formatted += `\n  🧱 Block: ${data.blockNumber}`;
@@ -519,11 +549,27 @@ class BlockchainLogger {
       case 'rejection':
         formatted += `\n  ❌ Reason: ${data.reason}`;
         if (data.transactionHash) {
-          formatted += `\n  🔗 TX: ${String(data.transactionHash)}`;
+          let txHashStr = data.transactionHash;
+          if (typeof txHashStr !== 'string') {
+            try {
+              txHashStr = JSON.stringify(txHashStr);
+            } catch {
+              txHashStr = 'Invalid Hash';
+            }
+          }
+          formatted += `\n  🔗 TX: ${txHashStr}`;
         }
         break;
       case 'transaction':
-        formatted += `\n  🔗 Hash: ${String(data.transactionHash)}`;
+        let txHashStr = data.transactionHash;
+        if (typeof txHashStr !== 'string') {
+          try {
+            txHashStr = JSON.stringify(txHashStr);
+          } catch {
+            txHashStr = 'Invalid Hash';
+          }
+        }
+        formatted += `\n  🔗 Hash: ${txHashStr}`;
         if (data.blockNumber) {
           formatted += `\n  🧱 Block: ${data.blockNumber}`;
         }
@@ -544,10 +590,23 @@ class BlockchainLogger {
     }
 
     // Add blockchain details block
-    if (data.transactionHash || data.blockNumber || data.gasUsed) {
+    if (type === 'block') {
       formatted += `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
       formatted += `\n🔗 BLOCKCHAIN DETAILS:`;
-      if (data.transactionHash) formatted += `\n  Hash: ${String(data.transactionHash)}`;
+      formatted += `\n  tx: ${data.tx || ''}`;
+      formatted += `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+    } else if (data.transactionHash || data.blockNumber || data.gasUsed) {
+      formatted += `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+      formatted += `\n🔗 BLOCKCHAIN DETAILS:`;
+      let txHashStr = data.transactionHash;
+      if (typeof txHashStr !== 'string') {
+        try {
+          txHashStr = JSON.stringify(txHashStr);
+        } catch {
+          txHashStr = 'Invalid Hash';
+        }
+      }
+      if (data.transactionHash) formatted += `\n  Hash: ${txHashStr}`;
       if (data.blockNumber) formatted += `\n  Block: ${data.blockNumber}`;
       if (data.gasUsed) formatted += `\n  Gas Used: ${data.gasUsed}`;
       if (data.gasPrice) formatted += `\n  Gas Price: ${data.gasPrice}`;

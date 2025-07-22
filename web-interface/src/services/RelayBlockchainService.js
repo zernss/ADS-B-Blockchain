@@ -129,19 +129,30 @@ class RelayBlockchainSystem {
       const result = await response.json();
       
       if (result.success) {
-        // Log blockchain activity
-        blockchainLogger.logTransaction(result.transactionHash, 'Flight batch via relay', {
-          count: flights.length,
-          blockNumber: result.blockNumber
-        });
+        // Log each transaction in the batch
+        if (Array.isArray(result.transactions)) {
+          result.transactions.forEach(txInfo => {
+            blockchainLogger.logTransaction(txInfo.transactionHash, 'Flight batch via relay', {
+              count: txInfo.flightsCount,
+              blockNumber: txInfo.blockNumber,
+              gasUsed: txInfo.gasUsed
+            });
+          });
+        } else if (result.transactionHash) {
+          // Fallback for single transactionHash (legacy)
+          blockchainLogger.logTransaction(result.transactionHash, 'Flight batch via relay', {
+            count: flights.length,
+            blockNumber: result.blockNumber
+          });
+        }
         
         if (result.gasUsed) {
           blockchainLogger.logGasUsage(result.gasUsed, result.gasPrice || '0', result.totalCost || '0');
         }
         
         blockchainLogger.log('success', 'Batch data penerbangan berhasil ditambah melalui server relay', {
-          transactionHash: result.transactionHash,
-          blockNumber: result.blockNumber,
+          transactionHash: Array.isArray(result.transactions) && result.transactions.length > 0 ? result.transactions.map(tx => tx.transactionHash).join(', ') : result.transactionHash,
+          blockNumber: Array.isArray(result.transactions) && result.transactions.length > 0 ? result.transactions.map(tx => tx.blockNumber).join(', ') : result.blockNumber,
           gasUsed: result.gasUsed,
           flightsCount: result.flightsCount
         });
