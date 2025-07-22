@@ -681,7 +681,9 @@ class BlockchainLogger {
         DataTamperingAttack: 0,
         ReplayAttack: 0,
         succeeded: 0,
-        rejected: 0
+        rejected: 0,
+        succeededByType: { DataSpoofingAttack: 0, DataTamperingAttack: 0, ReplayAttack: 0 },
+        rejectedByType: { DataSpoofingAttack: 0, DataTamperingAttack: 0, ReplayAttack: 0 }
       },
       transactionCount: 0
     };
@@ -698,13 +700,24 @@ class BlockchainLogger {
           maxBlock = blockNum;
         }
       }
-      // Attack statistics
-      if (log.message && typeof log.message === 'string') {
-        if (log.message.includes('DataSpoofingAttack')) stats.attackStats.DataSpoofingAttack++;
-        if (log.message.includes('DataTamperingAttack')) stats.attackStats.DataTamperingAttack++;
-        if (log.message.includes('ReplayAttack')) stats.attackStats.ReplayAttack++;
-        if (log.type === 'event' && log.message.includes('Attack Succeeded')) stats.attackStats.succeeded++;
-        if ((log.type === 'rejection' || log.type === 'error') && (log.message.includes('Attack Prevented') || log.message.includes('Blocked'))) stats.attackStats.rejected++;
+      // Attack statistics (use log.data.attackType for accuracy)
+      const attackType = log.data && log.data.attackType;
+      if (attackType) {
+        let typeKey = null;
+        if (attackType === 'spoofing') typeKey = 'DataSpoofingAttack';
+        if (attackType === 'tampering') typeKey = 'DataTamperingAttack';
+        if (attackType === 'replay') typeKey = 'ReplayAttack';
+        if (typeKey) {
+          stats.attackStats[typeKey]++;
+          if (log.type === 'event' && log.message.includes('Attack Succeeded')) {
+            stats.attackStats.succeeded++;
+            stats.attackStats.succeededByType[typeKey]++;
+          }
+          if ((log.type === 'rejection' || log.type === 'error') && (log.message.includes('Attack Prevented') || log.message.includes('Blocked'))) {
+            stats.attackStats.rejected++;
+            stats.attackStats.rejectedByType[typeKey]++;
+          }
+        }
       }
     });
     stats.latestBlockNumber = maxBlock;

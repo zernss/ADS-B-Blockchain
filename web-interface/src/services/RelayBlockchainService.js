@@ -309,7 +309,8 @@ class RelayBlockchainSystem {
         if (result.transactionHash) {
           blockchainLogger.logTransaction(result.transactionHash, `Attack via relay: ${attackType}`, {
             attackType: attackType,
-            targetFlight: targetFlight.icao24
+            targetFlight: targetFlight.icao24,
+            blockNumber: result.blockNumber // Ensure blockNumber is included
           });
         }
         

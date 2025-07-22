@@ -40,7 +40,9 @@ const ActivityStatistics = ({ stats }) => {
     DataTamperingAttack: 0,
     ReplayAttack: 0,
     succeeded: 0,
-    rejected: 0
+    rejected: 0,
+    succeededByType: { DataSpoofingAttack: 0, DataTamperingAttack: 0, ReplayAttack: 0 },
+    rejectedByType: { DataSpoofingAttack: 0, DataTamperingAttack: 0, ReplayAttack: 0 }
   };
   return (
     <Card sx={{ mb: 2 }}>
@@ -62,11 +64,22 @@ const ActivityStatistics = ({ stats }) => {
           <Grid item xs={12} sm={3}>
             <Typography variant="subtitle2">Attack Statistics</Typography>
             <Box>
-              <Typography variant="body2">Data Spoofing: {attackStats.DataSpoofingAttack}</Typography>
-              <Typography variant="body2">Data Tampering: {attackStats.DataTamperingAttack}</Typography>
-              <Typography variant="body2">Replay: {attackStats.ReplayAttack}</Typography>
-              <Typography variant="body2" color="success.main">Succeeded: {attackStats.succeeded}</Typography>
-              <Typography variant="body2" color="error.main">Rejected: {attackStats.rejected}</Typography>
+              <Typography variant="body2" color="success.main">
+                Succeeded: {attackStats.succeeded}
+                <Box pl={2}>
+                  <Typography variant="caption" color="success.main">Data Spoofing: {attackStats.succeededByType.DataSpoofingAttack}</Typography><br/>
+                  <Typography variant="caption" color="success.main">Data Tampering: {attackStats.succeededByType.DataTamperingAttack}</Typography><br/>
+                  <Typography variant="caption" color="success.main">Replay: {attackStats.succeededByType.ReplayAttack}</Typography>
+                </Box>
+              </Typography>
+              <Typography variant="body2" color="error.main">
+                Rejected: {attackStats.rejected}
+                <Box pl={2}>
+                  <Typography variant="caption" color="error.main">Data Spoofing: {attackStats.rejectedByType.DataSpoofingAttack}</Typography><br/>
+                  <Typography variant="caption" color="error.main">Data Tampering: {attackStats.rejectedByType.DataTamperingAttack}</Typography><br/>
+                  <Typography variant="caption" color="error.main">Replay: {attackStats.rejectedByType.ReplayAttack}</Typography>
+                </Box>
+              </Typography>
             </Box>
           </Grid>
         </Grid>
@@ -162,6 +175,23 @@ const BlockchainActivityLogger = () => {
   const filteredLogs = logs.filter(log => {
     if (filter === 'all') return true;
     return log.type === filter;
+  });
+
+  // Sort logs so that for each block, the 'block' log appears before any 'transaction' logs with the same block number
+  const sortedLogs = [...filteredLogs].sort((a, b) => {
+    // Try to sort by blockNumber if available
+    const aBlock = parseInt(a.data?.blockNumber || a.data?.block || a.data?.block_number || a.data?.blockNum || 0);
+    const bBlock = parseInt(b.data?.blockNumber || b.data?.block || b.data?.block_number || b.data?.blockNum || 0);
+    if (!isNaN(aBlock) && !isNaN(bBlock) && aBlock !== bBlock) {
+      return bBlock - aBlock; // Descending block number
+    }
+    // If same block, put 'block' type before 'transaction'
+    if (aBlock === bBlock) {
+      if (a.type === 'block' && b.type === 'transaction') return -1;
+      if (a.type === 'transaction' && b.type === 'block') return 1;
+    }
+    // Otherwise, sort by timestamp descending
+    return b.timestamp > a.timestamp ? -1 : 1;
   });
 
   const handleClearLogs = () => {
@@ -360,13 +390,13 @@ const BlockchainActivityLogger = () => {
             onScroll={handleScroll}
             sx={logsContainerStyle}
           >
-            {filteredLogs.length === 0 ? (
+            {sortedLogs.length === 0 ? (
               <Alert severity="info">
                 No blockchain activity logged yet. Start interacting with the blockchain to see activity here.
               </Alert>
             ) : (
               <Box>
-                {filteredLogs.map((log) => (
+                {sortedLogs.map((log) => (
                   <Box key={log.id} sx={{ mb: 2, p: 1, bgcolor: 'white', borderRadius: 1, border: 1, borderColor: 'grey.200' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                       {getTypeIcon(log.type)}
@@ -517,13 +547,13 @@ const BlockchainActivityLogger = () => {
                 onScroll={handleScroll}
                 sx={logsContainerStyle}
               >
-                {filteredLogs.length === 0 ? (
+                {sortedLogs.length === 0 ? (
                   <Alert severity="info">
                     No blockchain activity logged yet. Start interacting with the blockchain to see activity here.
                   </Alert>
                 ) : (
                   <Box>
-                    {filteredLogs.map((log) => (
+                    {sortedLogs.map((log) => (
                       <Box key={log.id} sx={{ mb: 2, p: 1, bgcolor: 'white', borderRadius: 1, border: 1, borderColor: 'grey.200' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                           {getTypeIcon(log.type)}
