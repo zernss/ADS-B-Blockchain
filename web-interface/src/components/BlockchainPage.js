@@ -173,38 +173,28 @@ function BlockchainPage() {
   const simulateAttack = async (attackType) => {
     if (!flightService || flights.length === 0) return;
     const targetFlight = flights[Math.floor(Math.random() * flights.length)];
-    setConfirmationData({
-      type: 'attack',
-      attackType,
-      targetFlight
-    });
-    setOnConfirm(() => async () => {
-      try {
-        const result = await flightService.simulateAttack(attackType, targetFlight);
-        if (!result.detectedByBlockchain) {
-          setFlights(prevFlights => prevFlights.map(f => 
-            f.icao24 === targetFlight.icao24 ? { ...f, isUnderAttack: true } : f
-          ));
-        }
-        setAttackResults(prev => [{
-          timestamp: new Date(),
-          type: attackType,
-          targetFlight: result.targetFlight?.callsign || targetFlight.callsign,
-          detectedByBlockchain: result.detectedByBlockchain,
-          reason: result.reason,
-          transactionHash: result.transactionHash,
-          attackedFlight: result.attackedFlight,
-          eventLogs: result.eventLogs,
-          original: result.targetFlight || targetFlight,
-          attacked: result.attackedFlight
-        }, ...prev].slice(0, 10));
-      } catch (err) {
-        setError({ type: 'attack', message: `Failed to simulate ${attackType} attack. Error: ${err.message}` });
-      } finally {
-        setConfirmationOpen(false);
+    try {
+      const result = await flightService.simulateAttack(attackType, targetFlight);
+      if (!result.detectedByBlockchain) {
+        setFlights(prevFlights => prevFlights.map(f => 
+          f.icao24 === targetFlight.icao24 ? { ...f, isUnderAttack: true } : f
+        ));
       }
-    });
-    setConfirmationOpen(true);
+      setAttackResults(prev => [{
+        timestamp: new Date(),
+        type: attackType,
+        targetFlight: result.targetFlight?.callsign || targetFlight.callsign,
+        detectedByBlockchain: result.detectedByBlockchain,
+        reason: result.reason,
+        transactionHash: result.transactionHash,
+        attackedFlight: result.attackedFlight,
+        eventLogs: result.eventLogs,
+        original: result.targetFlight || targetFlight,
+        attacked: result.attackedFlight
+      }, ...prev].slice(0, 10));
+    } catch (err) {
+      setError({ type: 'attack', message: `Failed to simulate ${attackType} attack. Error: ${err.message}` });
+    }
   };
 
   const handleTabChange = (event, newValue) => {
@@ -468,7 +458,6 @@ function BlockchainPage() {
                     <Button variant="contained" onClick={updateFlights} sx={{ mr: 1 }} disabled={isUpdating}>
                       {isUpdating ? <CircularProgress size={24} /> : 'Refresh Flight Data'}
                     </Button>
-                    <Button variant="outlined" onClick={() => flightService?.getBlockchainSystem()?.getAllFlights().then(setFlights)}>Sync from Blockchain</Button>
                   </Box>
                 </Box>
               </CardContent>
@@ -513,7 +502,7 @@ function BlockchainPage() {
               </Box>
               {/* Attack Results Table */}
               <Box sx={{ mt: 3 }}>
-                <Typography variant="subtitle1">Attack Results (Blockchain System):</Typography>
+                <Typography variant="subtitle1">Attack results (Metamask System):</Typography>
                 {attackResults.length === 0 && (
                   <Typography variant="body2" color="text.secondary">No attacks simulated yet</Typography>
                 )}

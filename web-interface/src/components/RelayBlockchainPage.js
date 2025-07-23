@@ -356,13 +356,6 @@ function RelayBlockchainPage() {
                   <Typography variant="h6">Flight Map (Relay Blockchain Secured)</Typography>
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <Button 
-                      variant="outlined" 
-                      onClick={() => loadExistingFlights(relaySystem)} 
-                      disabled={!relaySystem}
-                    >
-                      Load from Blockchain
-                    </Button>
-                    <Button 
                       variant="contained" 
                       onClick={() => updateFlightData(relaySystem, true)} 
                       disabled={!relaySystem || updateStatus.includes('Fetching')}
