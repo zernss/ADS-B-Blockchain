@@ -2,8 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { ethers } from 'ethers';
 import { Box, Typography, Card, CardContent, Button, Alert, CircularProgress, Grid, Tabs, Tab, Paper, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import Map from './Map';
-import BlockchainInfo from './BlockchainInfo';
-import BlockchainLoggerComponent from './BlockchainLogger';
 import BlockchainActivityLogger from './BlockchainActivityLogger';
 import FlightDataService from '../services/FlightDataService';
 import blockchainLogger from '../services/BlockchainLogger';
@@ -441,8 +439,6 @@ function BlockchainPage() {
           <Paper>
             <Tabs value={activeTab} onChange={handleTabChange} centered>
               <Tab label="Flight Map" />
-              <Tab label="Blockchain Info" />
-              <Tab label="Network Logger" />
               <Tab label="🔗 Blockchain Activity" />
             </Tabs>
           </Paper>
@@ -467,21 +463,6 @@ function BlockchainPage() {
         )}
 
         {activeTab === 1 && (
-          <Grid item xs={12}>
-            <BlockchainInfo contract={contract} attackResults={attackResults} />
-          </Grid>
-        )}
-        
-        {activeTab === 2 && (
-          <Grid item xs={12}>
-            <BlockchainLoggerComponent 
-              provider={contract?.provider} 
-              isConnected={!!contract} 
-            />
-          </Grid>
-        )}
-
-        {activeTab === 3 && (
           <Grid item xs={12}>
             <BlockchainActivityLogger />
           </Grid>

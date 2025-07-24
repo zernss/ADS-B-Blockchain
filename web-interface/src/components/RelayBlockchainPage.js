@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Box, Typography, Card, CardContent, Button, Alert, CircularProgress, Grid, Tabs, Tab, Chip } from '@mui/material';
 import { ethers } from 'ethers';
 import Map from './Map';
-import BlockchainLoggerComponent from './BlockchainLogger';
 import BlockchainActivityLogger from './BlockchainActivityLogger';
 import FlightDetails from './FlightDetails';
 import RelayBlockchainSystem from '../services/RelayBlockchainService';
@@ -294,7 +293,6 @@ function RelayBlockchainPage() {
 
       <Tabs value={activeTab} onChange={handleTabChange} sx={{ mb: 3 }}>
         <Tab label="Flight Map" />
-        <Tab label="Network Logger" />
         <Tab label="🔗 Blockchain Activity" />
       </Tabs>
 
@@ -468,13 +466,6 @@ function RelayBlockchainPage() {
       )}
 
       {activeTab === 1 && (
-        <BlockchainLoggerComponent 
-          provider={readOnlyProvider} 
-          isConnected={connectionStatus === 'connected'} 
-        />
-      )}
-
-      {activeTab === 2 && (
         <BlockchainActivityLogger />
       )}
     </Box>
