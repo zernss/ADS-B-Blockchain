@@ -1,6 +1,5 @@
 # Blockchain Logger System
 
-I've created a comprehensive blockchain logging system for your ADS-B Blockchain project that will provide detailed visibility into your blockchain network activity.
 
 ## 🚀 Quick Start
 
